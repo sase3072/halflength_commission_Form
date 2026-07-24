@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>가변형 다인원 반신 커미션 폼 (2인/3인/4인 지원)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        @font-face {
+            font-family: 'BonmyeongjoSourceHanSerif';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/NotoSerifKR.woff') format('woff');
+            font-weight: normal;
+            font-display: swap;
+        }
+
+        :root {
+            --bg-color: #f8fafc; 
+            --card-bg: #ffffff;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --mic-color: #475569;
+            --primary-color: #38bdf8; 
+            --primary-hover: #0ea5e9;
+            --desc-font-size: 12px;
+            --main-font: 'Noto Sans KR', sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--main-font); font-weight: 500; }
+        body { background-color: var(--bg-color); color: var(--text-dark); display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px 10px; overflow-x: auto; overflow-y: auto; }
+
+        .workspace-container { display: flex; gap: 18px; max-width: 100%; justify-content: center; align-items: flex-start; margin-top: 10px; }
+
+        /* 사이드바 패널 */
+        .sidebar-panel { width: 240px; min-width: 230px; background: #ffffff; padding: 18px; border-radius: 16px; box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02); display: flex; flex-direction: column; gap: 14px; height: calc(100vh - 40px); max-height: 1000px; border: 1px solid var(--border-color); overflow-y: auto; flex-shrink: 0; position: sticky; top: 20px; }
+        .sidebar-panel::-webkit-scrollbar { width: 4px; }
+        .sidebar-panel::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
+        .panel-title { font-size: 13px; font-weight: 800; color: #0f172a; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .btn-group-vertical { display: flex; flex-direction: column; gap: 10px; width: 100%; height: 100%; }
+        .font-size-control-vertical { display: flex; flex-direction: column; gap: 8px; background: #f8fafc; padding: 12px; border-radius: 10px; font-size: 11px; color: var(--text-dark); font-weight: 700; border: 1px solid #f1f5f9; }
+        .font-size-control-vertical .slider-row { display: flex; align-items: center; gap: 8px; }
+        .font-size-control-vertical input[type="range"] { cursor: pointer; accent-color: #0f172a; flex-grow: 1; width: 100%; height: 4px; border-radius: 2px; }
+        #font-val, #height-val { color: #0f172a; font-weight: 700; min-width: 32px; text-align: right; }
+
+        .sticker-btn-label, .save-btn, .add-palette-btn, .bulk-color-btn, .reset-btn { display: block; width: 100%; padding: 10px 12px; color: #ffffff; border-radius: 10px; font-size: 11px; font-weight: 700; cursor: pointer; text-align: center; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); border: none; }
+        .sticker-btn-label { background: #0f172a; }
+        .sticker-btn-label:hover { background: #1e293b; transform: translateY(-1px); }
+        .add-palette-btn { background: #64748b; }
+        .add-palette-btn:hover { background: #475569; transform: translateY(-1px); }
+        .bulk-color-btn { background: #e2e8f0; color: #475569; padding: 6px; font-size: 11px; border-radius: 8px; }
+        .bulk-color-btn:hover { background: #cbd5e1; }
+        .reset-btn { background: #fef2f2; color: #ef4444; margin-top: auto; display: flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid #fee2e2; }
+        .reset-btn:hover { background: #fee2e2; }
+        .reset-svg { width: 12px; height: 12px; fill: none; stroke: #ef4444; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+        
+        .save-btn.png-theme { background: #0f172a; }
+        .save-btn.png-theme:hover { background: #1e293b; transform: translateY(-1px); }
+        .save-btn.jpeg-theme { background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; }
+        .save-btn.jpeg-theme:hover { background: #f8fafc; transform: translateY(-1px); }
+
+        .sidebar-section { display: flex; flex-direction: column; gap: 8px; background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #f1f5f9; }
+        .sidebar-title { font-size: 11px; font-weight: 700; color: #475569; display: flex; justify-content: space-between; align-items: center; padding-bottom: 2px; }
+
+        .toggle-label { display: inline-flex; align-items: center; cursor: pointer; gap: 4px; }
+        .toggle-input { display: none; }
+        .toggle-switch { width: 30px; height: 16px; background: #cbd5e1; border-radius: 10px; position: relative; transition: background 0.2s; }
+        .toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; background: white; border-radius: 50%; transition: left 0.2s; }
+        .toggle-input:checked + .toggle-switch { background: #0f172a; }
+        .toggle-input:checked + .toggle-switch::after { left: 16px; }
+
+        .sidebar-input-group { display: flex; flex-direction: column; gap: 6px; background: #ffffff; padding: 10px; border-radius: 10px; border: 1px solid var(--border-color); }
+        .sidebar-meta-row { display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: var(--text-muted); font-weight: 700; }
+        .sidebar-tag-input { width: 100%; padding: 6px 8px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 11px; outline: none; color: var(--text-dark); background: #f8fafc; transition: border 0.15s; }
+        .sidebar-tag-input:focus { border-color: #cbd5e1; background: #ffffff; }
+        .sidebar-color-picker { width: 28px; height: 16px; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer; padding: 0; background: none; }
+
+        /* 🎯 메인 캔버스 기본 규격 (자바스크립트가 인원수에 따라 넓이 동적 제어) */
+        .template-outer { position: relative; width: 1800px; height: 1000px; background: var(--card-bg); box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08); overflow: hidden; border-radius: 20px; flex-shrink: 0; border: 1px solid var(--border-color); display: flex; padding: 30px 20px; gap: 20px; transform-origin: top left; transition: height 0.3s ease, width 0.3s ease; }
+        .credit-tag { position: absolute; top: 12px; right: 16px; font-size: 11px; font-weight: 700; color: #cbd5e1; letter-spacing: 0.5px; z-index: 100; }
+
+        /* 캐릭터 독립 열 */
+        .character-column { flex: 1; height: 100%; display: flex; flex-direction: column; align-items: center; position: relative; border-right: 1px dashed var(--border-color); padding: 0 15px; gap: 14px; cursor: pointer; transition: background-color 0.2s, box-shadow 0.2s; border-radius: 8px; }
+        .character-column.active-target { background-color: #f8fafc; box-shadow: inset 0 0 0 2px #e2e8f0; }
+
+        /* 성격 키워드 수평 정렬 + 그라데이션 */
+        .tag-list { display: flex; flex-direction: row; gap: 6px; width: 100%; transition: opacity 0.2s ease; justify-content: center; }
+        .tag-item { flex: 1; height: 26px; color: white; font-size: 11px; display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; font-weight: 700; border-radius: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 2px 4px rgba(0,0,0,0.05); background: linear-gradient(90deg, #8e959c, rgba(142, 149, 156, 0)); }
+
+        /* 한마디 말풍선 레이아웃 */
+        .top-speech-bubble { width: 100%; height: 50px; display: flex; align-items: center; gap: 6px; padding: 4px 10px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; box-shadow: 0 4px 12px rgba(15,23,42,0.04); transition: opacity 0.2s ease; flex-shrink: 0; }
+        .mic-icon-wrapper { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; flex-shrink: 0; }
+        .mic-icon-wrapper input[type="color"] { position: absolute; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+        .mic-svg { width: 22px; height: 22px; fill: var(--mic-color); display: none; }
+        .mic-svg.active { display: block; }
+        .speech-input-wrapper { flex-grow: 1; height: 100%; display: flex; align-items: center; justify-content: center; }
+        .speech-input { width: 100%; font-size: 13px; font-weight: 700; color: #334155 !important; border: none; outline: none; background: transparent; text-align: center; resize: none; overflow: hidden; padding: 0; }
+        .speech-input.line-mode-1 { height: 20px; line-height: 20px; }
+        .speech-input.line-mode-2 { height: 40px; line-height: 1.4; }
+
+        /* 업로드 공통 존 구역 */
+        .upload-zone { position: relative; overflow: hidden; display: flex; justify-content: center; align-items: center; background: #f8fafc; border: 2px dashed #cbd5e1; transition: background 0.2s; }
+        .upload-zone:hover { background: #f1f5f9; }
+        .upload-zone input[type="file"] { display: none; }
+        .upload-zone img { position: absolute; min-width: 100%; min-height: 100%; object-fit: cover; cursor: move; user-select: none; transform-origin: center center; }
+        .placeholder-text { color: #94a3b8; text-align: center; font-size: 12px; z-index: 1; padding: 2px; pointer-events: none; line-height: 1.3; }
+        .upload-hint { position: absolute; bottom: 5px; right: 5px; font-size: 9px; color: #94a3b8; background: rgba(255,255,255,0.8); padding: 2px 4px; border-radius: 3px; pointer-events: none; z-index: 2; }
+
+        /* 🎯 메인 두상 박스 (가로 320px, 세로 500px 반영) */
+        .main-headshot-box { width: 320px; height: 500px; border-radius: 18px; flex-shrink: 0; box-shadow: 0 8px 20px rgba(15,23,42,0.06); }
+
+        .palette-container { width: 320px; flex-shrink: 0; margin-top: 4px; }
+        .palette-row { display: flex; gap: 6px; width: 100%; justify-content: center; }
+        .color-item { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; position: relative; }
+        .color-preview { width: 100%; height: 32px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none !important; cursor: pointer; position: relative; overflow: hidden; }
+        .color-preview input[type="color"] { position: absolute; top: -10px; left: -10px; width: 60px; height: 60px; cursor: pointer; border: none; background: transparent; }
+        .color-code-input { width: 100%; font-size: 9px; font-weight: 700; text-align: center; border: none; outline: none; background: transparent; text-transform: uppercase; color: #475569; }
+        .palette-del-btn { position: absolute; top: -6px; right: -6px; width: 14px; height: 14px; background: #ef4444; color: white; border: none; border-radius: 50%; font-size: 9px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 5; font-weight: bold; }
+
+        .profile-info { display: flex; flex-direction: column; gap: 12px; align-items: center; width: 100%; flex-grow: 1; overflow: hidden; margin-top: 4px; }
+        .name-container-vertical { display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .input-name { font-size: 22px; font-weight: 700; border: none; width: 100%; outline: none; text-align: center; background: transparent; color: #0f172a; }
+        .input-hanja { font-size: 13px; color: #94a3b8; border: none; width: 100%; outline: none; text-align: center; background: transparent; margin-top: 2px;}
+        
+        .spec-dynamic-row { display: flex; justify-content: center; align-items: center; gap: 6px; width: 100%; flex-wrap: wrap; }
+        .spec-box-item { background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 4px; display: flex; align-items: center; justify-content: center; position: relative; min-width: 48px; max-width: 80px; flex: 1 1 auto; }
+        .input-spec-field { font-size: 11px; font-weight: 700; color: #475569; border: none; width: 100%; outline: none; text-align: center; background: transparent; }
+        .spec-box-del-btn { position: absolute; top: -6px; right: -6px; width: 14px; height: 14px; background: #ef4444; color: #ffffff; border: none; border-radius: 50%; font-size: 9px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; font-weight: bold; }
+
+        .desc-list-wrapper { display: flex; flex-direction: column; gap: 6px; width: 100%; overflow: hidden; margin-top: 8px; }
+        .desc-list { list-style: none; display: flex; flex-direction: column; gap: 8px; width: 100%; padding-right: 4px; overflow-y: auto; max-height: 100%; }
+        .desc-list::-webkit-scrollbar { width: 4px; }
+        .desc-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
+        .desc-list li { display: flex; align-items: center; position: relative; width: 100%; }
+        .desc-list li::before { content: "▪"; margin-right: 6px; color: #334155; flex-shrink: 0; font-size: calc(var(--desc-font-size) - 1px); }
+        .desc-list input { font-weight: 500; border: none; width: 100%; color: #334155; outline: none; padding-right: 20px; font-size: var(--desc-font-size) !important; background: transparent; line-height: 1.4; }
+        .row-del-btn { position: absolute; right: 0; color: #ef4444; background: none; border: none; font-size: 14px; cursor: pointer; opacity: 0; z-index: 5; font-weight: bold; }
+        .desc-list li:hover .row-del-btn { opacity: 1; }
+        .row-add-btn { background: #ffffff; color: #64748b; border: 1px dashed #cbd5e1; padding: 8px; border-radius: 8px; font-size: 11px; cursor: pointer; text-align: center; font-weight: 700; width: 100%; transition: all 0.2s; }
+        .row-add-btn:hover { background: #f8fafc; color: #0f172a; border-color: #94a3b8; }
+
+        /* 스티커 레이어 */
+        .draggable-sticker { position: absolute; cursor: move; user-select: none; z-index: 100; padding: 6px; display: inline-block; transform-origin: center center; }
+        .draggable-sticker:hover { outline: 1px dashed var(--primary-color); }
+        .draggable-sticker img { width: 100%; height: auto; display: block; pointer-events: none; }
+        .delete-sticker-btn { position: absolute; top: -8px; left: -8px; width: 18px; height: 18px; background: #ef4444; color: white; border-radius: 50%; font-size: 11px; display: none; align-items: center; justify-content: center; cursor: pointer; border: none; font-weight: bold; z-index: 11; }
+        .resize-sticker-handle { position: absolute; bottom: -4px; right: -4px; width: 12px; height: 12px; background: var(--primary-color); cursor: se-resize; display: none; border-radius: 2px; z-index: 11; }
+        .rotate-sticker-handle { position: absolute; top: -4px; right: -4px; width: 16px; height: 16px; background: #222222; color: #ffffff; cursor: alias; display: none; border-radius: 50%; z-index: 11; font-size: 10px; align-items: center; justify-content: center; }
+        .draggable-sticker:hover .delete-sticker-btn, .draggable-sticker:hover .resize-sticker-handle, .draggable-sticker:hover .rotate-sticker-handle { display: flex; }
+        
+        /* 세이브 마스크 타겟링 */
+        .hide-on-save .delete-sticker-btn, .hide-on-save .resize-sticker-handle, .hide-on-save .rotate-sticker-handle, .hide-on-save .upload-hint, .hide-on-save .placeholder-text, .hide-on-save .row-del-btn, .hide-on-save .row-add-btn, .hide-on-save .palette-del-btn, .hide-on-save .spec-box-del-btn, .hide-on-save .color-preview input[type="color"] { display: none !important; }
+        .hide-on-save .upload-zone { border: none !important; background: transparent !important; }
+        .hide-on-save .draggable-sticker { outline: none !important; }
+        .hide-on-save .color-code-input { display: none !important; }
+        .hide-on-save .spec-box-item { background: transparent !important; border: none !important; }
+        .hide-on-save .desc-list { overflow: visible !important; }
+        .hide-on-save .character-column { box-shadow: none !important; background-color: transparent !important; }
+
+        /* 🎯 라디오 버튼 그리드 정렬 (버튼 크기 완벽 통일) */
+        .char-select-box, .line-select-box, .icon-select-box, .font-select-box { display: grid; gap: 4px; background: #f1f5f9; padding: 4px; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .char-select-box { grid-template-columns: repeat(4, 1fr); }
+        .line-select-box { grid-template-columns: repeat(2, 1fr); }
+        .icon-select-box { grid-template-columns: repeat(3, 1fr); }
+        .font-select-box { grid-template-columns: repeat(2, 1fr); }
+        
+        .char-select-label, .line-select-label, .icon-select-label, .font-select-label { text-align: center; font-size: 11px; padding: 6px 0; background: transparent; border: none; border-radius: 6px; cursor: pointer; font-weight: 700; color: #64748b; transition: all 0.15s ease; width: 100%; box-sizing: border-box; }
+        .char-select-label input, .line-select-label input, .icon-select-label input, .font-select-label input { display: none; }
+        .char-select-label:has(input:checked), .line-select-label:has(input:checked), .icon-select-label:has(input:checked), .font-select-label:has(input:checked) { background: #ffffff; color: #0f172a; box-shadow: 0 2px 4px rgba(15,23,42,0.05); }
+    </style>
+</head>
+<body>
+
+    <div class="workspace-container">
+        
+        <!-- [좌측 패널] 통합 세팅 센터 -->
+        <div class="sidebar-panel">
+            <div class="panel-title">⚙️ 컴포넌트 세팅</div>
+
+            <!-- 🎯 [신규] 캔버스 인원수 다이나믹 설정 -->
+            <div class="sidebar-section">
+                <div class="sidebar-title">👥 캔버스 인원수 설정</div>
+                <div class="char-select-box" style="grid-template-columns: repeat(3, 1fr);">
+                    <label class="char-select-label"><input type="radio" name="member-count-choice" value="2" onchange="changeMemberCount(this.value)">2인</label>
+                    <label class="char-select-label"><input type="radio" name="member-count-choice" value="3" onchange="changeMemberCount(this.value)">3인</label>
+                    <label class="char-select-label"><input type="radio" name="member-count-choice" value="4" checked onchange="changeMemberCount(this.value)">4인</label>
+                </div>
+                <span style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">💡 화면 가로 길이가 자동으로 조절됩니다.</span>
+            </div>
+
+            <!-- 타겟 캐릭터 집중 선택 -->
+            <div class="sidebar-section">
+                <div class="sidebar-title">🎯 편집 중인 캐릭터</div>
+                <div class="char-select-box" id="char-btn-grid">
+                    <label class="char-select-label" id="lbl-char-1"><input type="radio" name="target-char-choice" value="1" checked onchange="switchTargetCharacter(this.value)">1번</label>
+                    <label class="char-select-label" id="lbl-char-2"><input type="radio" name="target-char-choice" value="2" onchange="switchTargetCharacter(this.value)">2번</label>
+                    <label class="char-select-label" id="lbl-char-3"><input type="radio" name="target-char-choice" value="3" onchange="switchTargetCharacter(this.value)">3번</label>
+                    <label class="char-select-label" id="lbl-char-4"><input type="radio" name="target-char-choice" value="4" onchange="switchTargetCharacter(this.value)">4번</label>
+                </div>
+            </div>
+
+            <!-- 성격 키워드 제어 -->
+            <div class="sidebar-section">
+                <div class="sidebar-title">
+                    <span>🏷️ 성격 키워드</span>
+                    <label class="toggle-label">
+                        <input type="checkbox" checked class="toggle-input" id="sidebar-tag-toggle" onchange="toggleSingleVisibility('tag-list', this.checked)">
+                        <div class="toggle-switch"></div>
+                    </label>
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 4px; border-top: 1px dashed #cbd5e1; padding-top: 8px; margin-top: 2px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span style="font-size: 10px; font-weight: bold; color: #64748b;">일괄 색상 선택:</span>
+                        <input type="color" id="bulk-tag-color-picker" value="#8e959c" class="sidebar-color-picker">
+                    </div>
+                    <button class="bulk-color-btn" onclick="applyBulkTagColor()">🎨 선택캐 일괄 색상 적용</button>
+                </div>
+
+                <div class="sidebar-input-group" style="margin-top: 4px;">
+                    <div class="sidebar-meta-row"><span>키워드 1</span><input type="color" value="#8e959c" class="sidebar-color-picker" id="sidebar-picker-1" oninput="syncTagColor(1, this.value)"></div>
+                    <input type="text" value="성격 키워드 1" class="sidebar-tag-input" id="sidebar-input-text-1" oninput="syncTagText(1, this.value)">
+                </div>
+                <div class="sidebar-input-group">
+                    <div class="sidebar-meta-row"><span>키워드 2</span><input type="color" value="#8e959c" class="sidebar-color-picker" id="sidebar-picker-2" oninput="syncTagColor(2, this.value)"></div>
+                    <input type="text" value="성격 키워드 2" class="sidebar-tag-input" id="sidebar-input-text-2" oninput="syncTagText(2, this.value)">
+                </div>
+                <div class="sidebar-input-group">
+                    <div class="sidebar-meta-row"><span>키워드 3</span><input type="color" value="#8e959c" class="sidebar-color-picker" id="sidebar-picker-3" oninput="syncTagColor(3, this.value)"></div>
+                    <input type="text" value="성격 키워드 3" class="sidebar-tag-input" id="sidebar-input-text-3" oninput="syncTagText(3, this.value)">
+                </div>
+            </div>
+
+            <!-- 한마디 말풍선 제어단 -->
+            <div class="sidebar-section">
+                <div class="sidebar-title">
+                    <span>💬 한마디 말풍선</span>
+                    <label class="toggle-label">
+                        <input type="checkbox" checked class="toggle-input" id="sidebar-bubble-toggle" onchange="toggleSingleVisibility('top-speech-bubble', this.checked)">
+                        <div class="toggle-switch"></div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title"><span>💬 말풍선 정렬 방식</span></div>
+                <div class="line-select-box">
+                    <label class="line-select-label"><input type="radio" name="speech-line-choice" value="1" checked onchange="changeSpeechLineAlignment(this.value)">1줄</label>
+                    <label class="line-select-label"><input type="radio" name="speech-line-choice" value="2" onchange="changeSpeechLineAlignment(this.value)">2줄</label>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title"><span>💬 말풍선 아이콘 종류</span></div>
+                <div class="icon-select-box">
+                    <label class="icon-select-label"><input type="radio" name="bubble-icon-choice" value="mic" checked onchange="changeSpeechIcon(this.value)">마이크</label>
+                    <label class="icon-select-label"><input type="radio" name="bubble-icon-choice" value="quote" onchange="changeSpeechIcon(this.value)">인용구</label>
+                    <label class="icon-select-label"><input type="radio" name="bubble-icon-choice" value="smile" onchange="changeSpeechIcon(this.value)">표정</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- [중앙 영역] 4인 두상 맞춤형 대형 캔버스 -->
+        <div class="template-outer" id="main-canvas">
+            <div class="credit-tag">@sa_se372</div>
+            
+            <!-- 캐릭터 1 -->
+            <div class="character-column active-target" id="char-col-1" onclick="handleColClick('1')">
+                <div class="tag-list" id="c1-tag-list-layer">
+                    <div id="c1-tag-item-1" class="tag-item">성격 키워드 1</div>
+                    <div id="c1-tag-item-2" class="tag-item">성격 키워드 2</div>
+                    <div id="c1-tag-item-3" class="tag-item">성격 키워드 3</div>
+                </div>
+                
+                <div class="top-speech-bubble" id="c1-speech-bubble-layer">
+                    <div class="mic-icon-wrapper" title="아이콘 색상">
+                        <svg class="mic-svg active icon-mic" viewBox="0 0 24 24"><rect x="11" y="19" width="2" height="2" /><rect x="6" y="20" width="12" height="2" rx="1" /><path d="M4,10 v1 a8,8 0 0,0 16,0 v-1 h-2 v1 a6,6 0 0,1 -12,0 v-1 z" /><rect x="7.5" y="2" width="9" height="13" rx="4.5" /></svg>
+                        <svg class="mic-svg icon-quote" viewBox="0 0 24 24"><path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/></svg>
+                        <svg class="mic-svg icon-smile" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2" fill="none" style="stroke: var(--mic-color);"/><circle cx="8.5" cy="9.5" r="1.5"/><circle cx="15.5" cy="9.5" r="1.5"/><path d="M8 14.5s2.5 3 4 3 4-3 4-3" stroke-width="2" stroke-linecap="round" fill="none" style="stroke: var(--mic-color);"/></svg>
+                        <input type="color" value="#475569" oninput="changeMicColor(this, 1)">
+                    </div>
+                    <div class="speech-input-wrapper">
+                        <textarea class="speech-input line-mode-1" id="c1-input-speech" placeholder="한마디 입력"></textarea>
+                    </div>
+                </div>
+
+                <!-- 🎯 반신 메인 320x500 -->
+                <div class="upload-zone main-headshot-box" id="c1-bust-upload-zone" ondblclick="triggerFileInput(this)">
+                    <div class="placeholder-text">더블클릭<br>반신 이미지 업로드</div><span class="upload-hint">클릭</span>
+                    <input type="file" accept="image/*" onchange="displayUploadedImage(event, this)">
+                </div>
+
+                <!-- 프로필 정보 영역 -->
+                <div class="palette-container">
+                    <div class="palette-row" id="c1-palette-row">
+                        <!-- JS에서 동적으로 팔레트 생성됨 -->
+                    </div>
+                </div>
+                <div class="profile-info">
+                    <div class="name-container-vertical"><input type="text" class="input-name" id="c1-input-name" value="캐릭터 1"><input type="text" class="input-hanja" id="c1-input-hanja" value="Character 01"></div>
+                    <div class="spec-dynamic-row" id="c1-spec-container"></div>
+                    <div class="desc-list-wrapper"><ul class="desc-list" id="c1-desc-container"></ul><button class="row-add-btn" onclick="addDescRow(1)">+ 상세 설명 추가</button></div>
+                </div>
+            </div>
+
+            <!-- 캐릭터 2 -->
+            <div class="character-column" id="char-col-2" onclick="handleColClick('2')">
+                <div class="tag-list" id="c2-tag-list-layer">
+                    <div id="c2-tag-item-1" class="tag-item">성격 키워드 1</div>
+                    <div id="c2-tag-item-2" class="tag-item">성격 키워드 2</div>
+                    <div id="c2-tag-item-3" class="tag-item">성격 키워드 3</div>
+                </div>
+                
+                <div class="top-speech-bubble" id="c2-speech-bubble-layer">
+                    <div class="mic-icon-wrapper" title="아이콘 색상">
+                        <svg class="mic-svg active icon-mic" viewBox="0 0 24 24"><rect x="11" y="19" width="2" height="2" /><rect x="6" y="20" width="12" height="2" rx="1" /><path d="M4,10 v1 a8,8 0 0,0 16,0 v-1 h-2 v1 a6,6 0 0,1 -12,0 v-1 z" /><rect x="7.5" y="2" width="9" height="13" rx="4.5" /></svg>
+                        <svg class="mic-svg icon-quote" viewBox="0 0 24 24"><path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/></svg>
+                        <svg class="mic-svg icon-smile" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2" fill="none" style="stroke: var(--mic-color);"/><circle cx="8.5" cy="9.5" r="1.5"/><circle cx="15.5" cy="9.5" r="1.5"/><path d="M8 14.5s2.5 3 4 3 4-3 4-3" stroke-width="2" stroke-linecap="round" fill="none" style="stroke: var(--mic-color);"/></svg>
+                        <input type="color" value="#475569" oninput="changeMicColor(this, 2)">
+                    </div>
+                    <div class="speech-input-wrapper">
+                        <textarea class="speech-input line-mode-1" id="c2-input-speech" placeholder="한마디 입력"></textarea>
+                    </div>
+                </div>
+
+                <div class="upload-zone main-headshot-box" id="c2-bust-upload-zone" ondblclick="triggerFileInput(this)">
+                    <div class="placeholder-text">더블클릭<br>반신 이미지 업로드</div><span class="upload-hint">클릭</span>
+                    <input type="file" accept="image/*" onchange="displayUploadedImage(event, this)">
+                </div>
+
+                <div class="palette-container">
+                    <div class="palette-row" id="c2-palette-row"></div>
+                </div>
+                <div class="profile-info">
+                    <div class="name-container-vertical"><input type="text" class="input-name" id="c2-input-name" value="캐릭터 2"><input type="text" class="input-hanja" id="c2-input-hanja" value="Character 02"></div>
+                    <div class="spec-dynamic-row" id="c2-spec-container"></div>
+                    <div class="desc-list-wrapper"><ul class="desc-list" id="c2-desc-container"></ul><button class="row-add-btn" onclick="addDescRow(2)">+ 상세 설명 추가</button></div>
+                </div>
+            </div>
+
+            <!-- 캐릭터 3 -->
+            <div class="character-column" id="char-col-3" onclick="handleColClick('3')">
+                <div class="tag-list" id="c3-tag-list-layer">
+                    <div id="c3-tag-item-1" class="tag-item">성격 키워드 1</div>
+                    <div id="c3-tag-item-2" class="tag-item">성격 키워드 2</div>
+                    <div id="c3-tag-item-3" class="tag-item">성격 키워드 3</div>
+                </div>
+                
+                <div class="top-speech-bubble" id="c3-speech-bubble-layer">
+                    <div class="mic-icon-wrapper" title="아이콘 색상">
+                        <svg class="mic-svg active icon-mic" viewBox="0 0 24 24"><rect x="11" y="19" width="2" height="2" /><rect x="6" y="20" width="12" height="2" rx="1" /><path d="M4,10 v1 a8,8 0 0,0 16,0 v-1 h-2 v1 a6,6 0 0,1 -12,0 v-1 z" /><rect x="7.5" y="2" width="9" height="13" rx="4.5" /></svg>
+                        <svg class="mic-svg icon-quote" viewBox="0 0 24 24"><path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/></svg>
+                        <svg class="mic-svg icon-smile" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2" fill="none" style="stroke: var(--mic-color);"/><circle cx="8.5" cy="9.5" r="1.5"/><circle cx="15.5" cy="9.5" r="1.5"/><path d="M8 14.5s2.5 3 4 3 4-3 4-3" stroke-width="2" stroke-linecap="round" fill="none" style="stroke: var(--mic-color);"/></svg>
+                        <input type="color" value="#475569" oninput="changeMicColor(this, 3)">
+                    </div>
+                    <div class="speech-input-wrapper">
+                        <textarea class="speech-input line-mode-1" id="c3-input-speech" placeholder="한마디 입력"></textarea>
+                    </div>
+                </div>
+
+                <div class="upload-zone main-headshot-box" id="c3-bust-upload-zone" ondblclick="triggerFileInput(this)">
+                    <div class="placeholder-text">더블클릭<br>반신 이미지 업로드</div><span class="upload-hint">클릭</span>
+                    <input type="file" accept="image/*" onchange="displayUploadedImage(event, this)">
+                </div>
+
+                <div class="palette-container">
+                    <div class="palette-row" id="c3-palette-row"></div>
+                </div>
+                <div class="profile-info">
+                    <div class="name-container-vertical"><input type="text" class="input-name" id="c3-input-name" value="캐릭터 3"><input type="text" class="input-hanja" id="c3-input-hanja" value="Character 03"></div>
+                    <div class="spec-dynamic-row" id="c3-spec-container"></div>
+                    <div class="desc-list-wrapper"><ul class="desc-list" id="c3-desc-container"></ul><button class="row-add-btn" onclick="addDescRow(3)">+ 상세 설명 추가</button></div>
+                </div>
+            </div>
+
+            <!-- 캐릭터 4 -->
+            <div class="character-column" id="char-col-4" onclick="handleColClick('4')">
+                <div class="tag-list" id="c4-tag-list-layer">
+                    <div id="c4-tag-item-1" class="tag-item">성격 키워드 1</div>
+                    <div id="c4-tag-item-2" class="tag-item">성격 키워드 2</div>
+                    <div id="c4-tag-item-3" class="tag-item">성격 키워드 3</div>
+                </div>
+                
+                <div class="top-speech-bubble" id="c4-speech-bubble-layer">
+                    <div class="mic-icon-wrapper" title="아이콘 색상">
+                        <svg class="mic-svg active icon-mic" viewBox="0 0 24 24"><rect x="11" y="19" width="2" height="2" /><rect x="6" y="20" width="12" height="2" rx="1" /><path d="M4,10 v1 a8,8 0 0,0 16,0 v-1 h-2 v1 a6,6 0 0,1 -12,0 v-1 z" /><rect x="7.5" y="2" width="9" height="13" rx="4.5" /></svg>
+                        <svg class="mic-svg icon-quote" viewBox="0 0 24 24"><path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/></svg>
+                        <svg class="mic-svg icon-smile" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2" fill="none" style="stroke: var(--mic-color);"/><circle cx="8.5" cy="9.5" r="1.5"/><circle cx="15.5" cy="9.5" r="1.5"/><path d="M8 14.5s2.5 3 4 3 4-3 4-3" stroke-width="2" stroke-linecap="round" fill="none" style="stroke: var(--mic-color);"/></svg>
+                        <input type="color" value="#475569" oninput="changeMicColor(this, 4)">
+                    </div>
+                    <div class="speech-input-wrapper">
+                        <textarea class="speech-input line-mode-1" id="c4-input-speech" placeholder="한마디 입력"></textarea>
+                    </div>
+                </div>
+
+                <div class="upload-zone main-headshot-box" id="c4-bust-upload-zone" ondblclick="triggerFileInput(this)">
+                    <div class="placeholder-text">더블클릭<br>반신 이미지 업로드</div><span class="upload-hint">클릭</span>
+                    <input type="file" accept="image/*" onchange="displayUploadedImage(event, this)">
+                </div>
+
+                <div class="palette-container">
+                    <div class="palette-row" id="c4-palette-row"></div>
+                </div>
+                <div class="profile-info">
+                    <div class="name-container-vertical"><input type="text" class="input-name" id="c4-input-name" value="캐릭터 4"><input type="text" class="input-hanja" id="c4-input-hanja" value="Character 04"></div>
+                    <div class="spec-dynamic-row" id="c4-spec-container"></div>
+                    <div class="desc-list-wrapper"><ul class="desc-list" id="c4-desc-container"></ul><button class="row-add-btn" onclick="addDescRow(4)">+ 상세 설명 추가</button></div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- [우측 패널] 유틸리티 기능 -->
+        <div class="sidebar-panel">
+            <div class="panel-title">🛠️ 유틸리티 도구</div>
+            
+            <div class="btn-group-vertical">
+                <!-- 하단 여백 조절 슬라이더 -->
+                <div class="font-size-control-vertical" style="background: #e0f2fe; border-color: #bae6fd;">
+                    <span>↕️ 캔버스 하단 여백 조절</span>
+                    <div class="slider-row">
+                        <input type="range" id="height-slider" min="0" max="800" value="0" step="20" oninput="changeCanvasHeight(this.value)">
+                        <span id="height-val">0px</span>
+                    </div>
+                </div>
+
+                <label class="sticker-btn-label">✨ 스티커/데코 추가 선택<input type="file" accept="image/*" style="display:none;" onchange="createNewSticker(event)"></label>
+                <button class="add-palette-btn" onclick="addNewPaletteItem()">🎨 컬러 팔레트 추가</button>
+                <button class="add-palette-btn" style="background: #0f172a;" onclick="addSingleSpecCardSlot()">📋 프로필 박스 추가</button>
+                
+                <div class="font-size-control-vertical" style="margin-top: 2px;">
+                    <span>🅰️ 서체 종류 선택</span>
+                    <div class="font-select-box">
+                        <label class="font-select-label"><input type="radio" name="font-style-choice" value="sans" checked onchange="changeMainFontFamily(this.value)">고딕체</label>
+                        <label class="font-select-label"><input type="radio" name="font-style-choice" value="serif" onchange="changeMainFontFamily(this.value)">명조체</label>
+                    </div>
+                </div>
+
+                <div class="font-size-control-vertical">
+                    <span>설명란 글씨 크기</span>
+                    <div class="slider-row">
+                        <input type="range" id="font-slider" min="10" max="18" value="12" oninput="changeDescFontSize(this.value)">
+                        <span id="font-val">12px</span>
+                    </div>
+                </div>
+
+                <button class="save-btn png-theme" style="margin-top: 10px;" onclick="saveTemplateAsImage('png')">🖼️ PNG 고화질 저장</button>
+                <button class="save-btn jpeg-theme" onclick="saveTemplateAsImage('jpeg')">🖼️ JPEG 고화질 저장</button>
+                
+                <button class="reset-btn" onclick="resetCanvasData()">
+                    <svg class="reset-svg" viewBox="0 0 24 24"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                    전체 데이터 초기화
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let currentTargetChar = "1"; 
+        let paletteCounts = { "1": 2, "2": 2, "3": 2, "4": 2 };
+        let charSettings = {};
+
+        function initCharSettings() {
+            for(let i=1; i<=4; i++) {
+                charSettings[`char_${i}`] = {
+                    tagVisible: true,
+                    bubbleVisible: true,
+                    bubbleIcon: 'mic',
+                    bubbleLine: '1',
+                    tags: [
+                        { text: '키워드 1', color: '#8e959c' },
+                        { text: '키워드 2', color: '#8e959c' },
+                        { text: '키워드 3', color: '#8e959c' }
+                    ]
+                };
+            }
+        }
+
+        // 🎯 캔버스 인원수 (2, 3, 4) 동적 변경 함수
+        function changeMemberCount(val) {
+            const count = parseInt(val);
+            const canvas = document.getElementById('main-canvas');
+            
+            // 인원수에 따른 메인 캔버스 폭 지정
+            if (count === 2) canvas.style.width = '920px'; 
+            else if (count === 3) canvas.style.width = '1360px';
+            else canvas.style.width = '1800px';
+
+            // 열(Column) 활성화/비활성화 처리
+            for(let i=1; i<=4; i++) {
+                const col = document.getElementById(`char-col-${i}`);
+                const btn = document.getElementById(`lbl-char-${i}`);
+                if(i <= count) {
+                    col.style.display = 'flex';
+                    btn.style.display = 'block';
+                } else {
+                    col.style.display = 'none';
+                    btn.style.display = 'none';
+                }
+            }
+
+            // CSS 그리드 박스 배열 형태 자동 갱신
+            document.getElementById('char-btn-grid').style.gridTemplateColumns = `repeat(${count}, 1fr)`;
+
+            // 점선 우측 테두리 로직 처리 (마지막 보이는 열의 테두리 없애기)
+            document.querySelectorAll('.character-column').forEach(c => c.style.borderRight = '1px dashed var(--border-color)');
+            document.getElementById(`char-col-${count}`).style.borderRight = 'none';
+            
+            // 현재 타겟이 숨겨진 캐릭터일 경우 1번으로 강제 이동
+            if (parseInt(currentTargetChar) > count) handleColClick('1');
+
+            saveToLocalStorage();
+            setTimeout(autoResponsiveScale, 100); 
+        }
+
+        // 반응형 스케일 오토 매칭 엔진
+        function autoResponsiveScale() {
+            const canvas = document.getElementById('main-canvas');
+            const container = document.querySelector('.workspace-container');
+            if(!canvas || !container) return;
+            
+            const paddingGapWidth = 400; // 사이드바 공간 고려
+            const availableWidth = window.innerWidth - paddingGapWidth;
+            const currentCanvasWidth = parseInt(canvas.style.width) || 1800; // 현재 인원수 모드에 따른 넓이
+            
+            if (availableWidth < currentCanvasWidth && availableWidth > 400) {
+                const scaleFactor = availableWidth / currentCanvasWidth;
+                canvas.style.transform = `scale(${scaleFactor})`;
+                const computedCollapsedWidth = currentCanvasWidth * scaleFactor;
+                canvas.style.marginRight = `-${currentCanvasWidth - computedCollapsedWidth}px`;
+            } else {
+                canvas.style.transform = 'none';
+                canvas.style.marginRight = '0px';
+            }
+        }
+
+        // 캔버스 세로 확장 높이 조절
+        function changeCanvasHeight(val) {
+            document.getElementById('height-slider').value = val;
+            document.getElementById('height-val').innerText = val + 'px';
+            const baseHeight = 1000;
+            document.getElementById('main-canvas').style.height = (baseHeight + parseInt(val)) + 'px';
+            saveToLocalStorage();
+        }
+
+        function handleColClick(charNum) {
+            if(currentTargetChar === charNum) return;
+            document.getElementById(`lbl-char-${charNum}`).querySelector('input').checked = true;
+            switchTargetCharacter(charNum);
+        }
+
+        function switchTargetCharacter(charNum) {
+            currentTargetChar = charNum;
+            document.querySelectorAll('.character-column').forEach(col => col.classList.remove('active-target'));
+            document.getElementById(`char-col-${charNum}`).classList.add('active-target');
+
+            const cfg = charSettings[`char_${charNum}`];
+            if(!cfg) return;
+
+            document.getElementById('sidebar-tag-toggle').checked = cfg.tagVisible;
+            document.getElementById('sidebar-bubble-toggle').checked = cfg.bubbleVisible;
+
+            const iconRadio = document.querySelector(`input[name="bubble-icon-choice"][value="${cfg.bubbleIcon}"]`);
+            if(iconRadio) iconRadio.checked = true;
+            
+            const lineRadio = document.querySelector(`input[name="speech-line-choice"][value="${cfg.bubbleLine}"]`);
+            if(lineRadio) lineRadio.checked = true;
+
+            cfg.tags.forEach((tag, idx) => {
+                document.getElementById(`sidebar-input-text-${idx+1}`).value = tag.text;
+                document.getElementById(`sidebar-picker-${idx+1}`).value = tag.color;
+            });
+        }
+
+        function saveToLocalStorage() {
+            const data = { charSettings: charSettings };
+            for(let i=1; i<=4; i++) {
+                const specInputs = document.querySelectorAll(`#c${i}-spec-container .input-spec-field`);
+                const specValues = [];
+                specInputs.forEach(input => specValues.push(input.value));
+
+                // 🎯 2. 버그 수정: 영구(기본) 팔레트도 색상 변경 값을 함께 저장하도록 조치
+                const savedPalettes = [];
+                document.querySelectorAll(`#c${i}-palette-row .color-item`).forEach((item) => {
+                    const inputColor = item.querySelector('input[type="text"]');
+                    const isPermanent = item.getAttribute('data-permanent') === 'true';
+                    if (inputColor) savedPalettes.push({ id: inputColor.id, color: inputColor.value, isPermanent: isPermanent });
+                });
+
+                data[`char_${i}`] = {
+                    speech: document.getElementById(`c${i}-input-speech`).value,
+                    name: document.getElementById(`c${i}-input-name`).value,
+                    hanja: document.getElementById(`c${i}-input-hanja`).value,
+                    descriptions: Array.from(document.querySelectorAll(`#c${i}-desc-container input`)).map(input => input.value),
+                    specs: specValues,
+                    palettes: savedPalettes
+                };
+            }
+            data.global = {
+                fontChoice: document.querySelector('input[name="font-style-choice"]:checked')?.value || 'sans',
+                fontSize: document.getElementById('font-slider').value,
+                canvasExt: document.getElementById('height-slider').value,
+                memberCount: document.querySelector('input[name="member-count-choice"]:checked')?.value || '4'
+            };
+            localStorage.setItem('trpg_4party_halfbody_v3_data', JSON.stringify(data));
+        }
+
+        function loadFromLocalStorage() {
+            initCharSettings();
+            const savedDataString = localStorage.getItem('trpg_4party_halfbody_v3_data');
+            
+            for(let i=1; i<=4; i++) {
+                document.getElementById(`c${i}-desc-container`).innerHTML = '';
+                document.getElementById(`c${i}-spec-container`).innerHTML = '';
+                document.getElementById(`c${i}-palette-row`).innerHTML = '';
+            }
+
+            if (savedDataString) {
+                try {
+                    const data = JSON.parse(savedDataString);
+                    if(data.charSettings) charSettings = data.charSettings;
+
+                    if(data.global) {
+                        const g = data.global;
+                        const fontRadio = document.querySelector(`input[name="font-style-choice"][value="${g.fontChoice}"]`);
+                        if(fontRadio) fontRadio.checked = true;
+                        changeMainFontFamily(g.fontChoice);
+
+                        document.getElementById('font-slider').value = g.fontSize || 12;
+                        changeDescFontSize(g.fontSize || 12);
+
+                        if(g.canvasExt) changeCanvasHeight(g.canvasExt);
+
+                        if(g.memberCount) {
+                            const countRadio = document.querySelector(`input[name="member-count-choice"][value="${g.memberCount}"]`);
+                            if(countRadio) countRadio.checked = true;
+                            changeMemberCount(g.memberCount);
+                        } else {
+                            changeMemberCount('4');
+                        }
+                    }
+
+                    for(let i=1; i<=4; i++) {
+                        const cData = data[`char_${i}`];
+                        if(cData) {
+                            document.getElementById(`c${i}-input-speech`).value = cData.speech || '';
+                            document.getElementById(`c${i}-input-name`).value = cData.name || `캐릭터 ${i}`;
+                            document.getElementById(`c${i}-input-hanja`).value = cData.hanja || `Character 0${i}`;
+                            
+                            if(cData.descriptions && cData.descriptions.length > 0) {
+                                cData.descriptions.forEach(text => addDescRow(i, text));
+                            } else { provideDefaultRows(i); }
+
+                            if(cData.specs && cData.specs.length > 0) {
+                                cData.specs.forEach(val => createSpecBoxNode(i, val));
+                            } else { buildInitialSpecsLayout(i); }
+
+                            // 팔레트 복구 (수정된 로직)
+                            if(cData.palettes && cData.palettes.length > 0) {
+                                cData.palettes.forEach(p => rebuildPaletteItem(i, p.id, p.color, p.isPermanent));
+                                paletteCounts[i] = cData.palettes.length;
+                            } else { provideDefaultPalettes(i); }
+                        } else {
+                            provideDefaultRows(i);
+                            buildInitialSpecsLayout(i);
+                            provideDefaultPalettes(i);
+                        }
+                        applyConfigToDOM(i);
+                    }
+                } catch(e) { fallbackDefaults(); changeMemberCount('4'); }
+            } else { fallbackDefaults(); changeMemberCount('4'); }
+            
+            switchTargetCharacter("1");
+            setupAutoSaveListeners();
+            setTimeout(autoResponsiveScale, 100);
+        }
+
+        function fallbackDefaults() {
+            for(let i=1; i<=4; i++) {
+                provideDefaultRows(i);
+                buildInitialSpecsLayout(i);
+                provideDefaultPalettes(i);
+                applyConfigToDOM(i);
+            }
+        }
+
+        function provideDefaultPalettes(i) {
+            rebuildPaletteItem(i, `c${i}-color-1`, '#3A444D', true);
+            rebuildPaletteItem(i, `c${i}-color-2`, '#7CBADE', true);
+            paletteCounts[i] = 2;
+        }
+
+        function applyConfigToDOM(i) {
+            const cfg = charSettings[`char_${i}`];
+            if(!cfg) return;
+
+            document.getElementById(`c${i}-tag-list-layer`).style.opacity = cfg.tagVisible ? "1" : "0";
+            document.getElementById(`c${i}-speech-bubble-layer`).style.opacity = cfg.bubbleVisible ? "1" : "0";
+
+            changeSpeechIconOfChar(i, cfg.bubbleIcon);
+            changeSpeechLineOfChar(i, cfg.bubbleLine);
+
+            cfg.tags.forEach((tag, idx) => {
+                const item = document.getElementById(`c${i}-tag-item-${idx+1}`);
+                if(item) {
+                    item.innerText = tag.text;
+                    const r = parseInt(tag.color.slice(1, 3), 16);
+                    const g = parseInt(tag.color.slice(3, 5), 16);
+                    const b = parseInt(tag.color.slice(5, 7), 16);
+                    item.style.background = `linear-gradient(90deg, ${tag.color}, rgba(${r}, ${g}, ${b}, 0))`;
+                }
+            });
+        }
+
+        function changeMainFontFamily(fontType) {
+            document.documentElement.style.setProperty('--main-font', fontType === 'serif' ? "'BonmyeongjoSourceHanSerif', 'Noto Serif KR', serif" : "'Noto Sans KR', sans-serif");
+        }
+
+        function toggleSingleVisibility(type, isChecked) {
+            const cfg = charSettings[`char_${currentTargetChar}`];
+            if(!cfg) return;
+
+            if(type === 'tag-list') {
+                cfg.tagVisible = isChecked;
+                document.getElementById(`c${currentTargetChar}-tag-list-layer`).style.opacity = isChecked ? "1" : "0";
+            } else if(type === 'top-speech-bubble') {
+                cfg.bubbleVisible = isChecked;
+                document.getElementById(`c${currentTargetChar}-speech-bubble-layer`).style.opacity = isChecked ? "1" : "0";
+            }
+            saveToLocalStorage();
+        }
+
+        function changeSpeechLineAlignment(val) {
+            const cfg = charSettings[`char_${currentTargetChar}`];
+            if(cfg) cfg.bubbleLine = val;
+            changeSpeechLineOfChar(currentTargetChar, val);
+            saveToLocalStorage();
+        }
+
+        function changeSpeechLineOfChar(charNum, val) {
+            const textarea = document.getElementById(`c${charNum}-input-speech`);
+            if(textarea) textarea.className = val === '1' ? 'speech-input line-mode-1' : 'speech-input line-mode-2';
+        }
+
+        function changeSpeechIcon(val) {
+            const cfg = charSettings[`char_${currentTargetChar}`];
+            if(cfg) cfg.bubbleIcon = val;
+            changeSpeechIconOfChar(currentTargetChar, val);
+            saveToLocalStorage();
+        }
+
+        function changeSpeechIconOfChar(charNum, val) {
+            const layer = document.getElementById(`c${charNum}-speech-bubble-layer`);
+            if(!layer) return;
+            layer.querySelectorAll('.mic-svg').forEach(svg => svg.classList.remove('active'));
+            layer.querySelector(`.icon-${val}`)?.classList.add('active');
+        }
+
+        function syncTagText(index, text) {
+            const cfg = charSettings[`char_${currentTargetChar}`];
+            if(cfg && cfg.tags[index-1]) cfg.tags[index-1].text = text;
+            const item = document.getElementById(`c${currentTargetChar}-tag-item-${index}`);
+            if(item) item.innerText = text;
+            saveToLocalStorage();
+        }
+
+        function syncTagColor(index, colorHex) {
+            const cfg = charSettings[`char_${currentTargetChar}`];
+            if(cfg && cfg.tags[index-1]) cfg.tags[index-1].color = colorHex;
+            const target = document.getElementById(`c${currentTargetChar}-tag-item-${index}`);
+            if(!target) return;
+            const r = parseInt(colorHex.slice(1, 3), 16);
+            const g = parseInt(colorHex.slice(3, 5), 16);
+            const b = parseInt(colorHex.slice(5, 7), 16);
+            target.style.background = `linear-gradient(90deg, ${colorHex}, rgba(${r}, ${g}, ${b}, 0))`;
+            saveToLocalStorage();
+        }
+
+        function applyBulkTagColor() {
+            const chosenColor = document.getElementById('bulk-tag-color-picker').value;
+            for(let i = 1; i <= 3; i++) {
+                document.getElementById(`sidebar-picker-${i}`).value = chosenColor;
+                syncTagColor(i, chosenColor);
+            }
+        }
+
+        function buildInitialSpecsLayout(charNum) {
+            ['성별', '나이', '신장', '기타'].forEach(val => createSpecBoxNode(charNum, val));
+        }
+
+        function createSpecBoxNode(charNum, textVal) {
+            const specContainer = document.getElementById(`c${charNum}-spec-container`);
+            const boxDiv = document.createElement('div');
+            boxDiv.className = 'spec-box-item';
+            boxDiv.innerHTML = `<button class="spec-box-del-btn" onclick="event.stopPropagation(); this.parentElement.remove(); saveToLocalStorage();">×</button><input type="text" class="input-spec-field" value="${textVal}" maxlength="10">`;
+            boxDiv.querySelector('input').addEventListener('input', saveToLocalStorage);
+            specContainer.appendChild(boxDiv);
+        }
+
+        function addSingleSpecCardSlot() {
+            const totalSlots = document.querySelectorAll(`#c${currentTargetChar}-spec-container .spec-box-item`).length;
+            if (totalSlots >= 6) { alert('프로필 박스는 캐릭터당 최대 6개까지만 배치 가능합니다.'); return; }
+            createSpecBoxNode(currentTargetChar, '입력');
+            saveToLocalStorage();
+        }
+
+        function provideDefaultRows(charNum) {
+            addDescRow(charNum, '상세 외관 포인트 기입');
+            addDescRow(charNum, '상세 외관 포인트 기입');
+            addDescRow(charNum, '상세 외관 포인트 기입');
+        }
+
+        function addDescRow(charNum, textValue = '상세 외관 포인트 기입') {
+            const container = document.getElementById(`c${charNum}-desc-container`);
+            const newLi = document.createElement('li');
+            newLi.innerHTML = `<input type="text" value="${textValue}"><button class="row-del-btn" onclick="this.parentElement.remove(); saveToLocalStorage();">×</button>`;
+            container.appendChild(newLi);
+            newLi.querySelector('input').addEventListener('input', saveToLocalStorage);
+            saveToLocalStorage();
+        }
+
+        function triggerFileInput(element) { element.querySelector('input[type="file"]').click(); }
+
+        function displayUploadedImage(event, inputElement) {
+            event.stopPropagation();
+            const selectedFile = event.target.files[0];
+            if (selectedFile) {
+                const fileReader = new FileReader();
+                fileReader.onload = function(e) {
+                    const zone = inputElement.parentElement;
+                    let imageTag = zone.querySelector('img');
+                    
+                    if (!imageTag) {
+                        imageTag = document.createElement('img');
+                        zone.appendChild(imageTag);
+                        imageTag.dataset.posX = 0; imageTag.dataset.posY = 0; imageTag.dataset.scale = 1.0;
+                        makeImageInteractive(imageTag, zone);
+                    }
+                    
+                    imageTag.src = e.target.result;
+                    imageTag.style.transform = "translate(0px, 0px) scale(1)";
+                    imageTag.dataset.posX = 0; imageTag.dataset.posY = 0; imageTag.dataset.scale = 1.0;
+
+                    const textPlaceholder = zone.querySelector('.placeholder-text');
+                    if (textPlaceholder) textPlaceholder.style.display = 'none';
+                }
+                fileReader.readAsDataURL(selectedFile);
+            }
+        }
+
+        function makeImageInteractive(img, zone) {
+            let activeMove = false, startX, startY;
+            zone.addEventListener('mousedown', (e) => {
+                if(e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.tagName === 'TEXTAREA') return;
+                activeMove = true;
+                startX = e.clientX - parseFloat(img.dataset.posX);
+                startY = e.clientY - parseFloat(img.dataset.posY);
+                e.preventDefault();
+            });
+            document.addEventListener('mousemove', (e) => {
+                if (!activeMove) return;
+                const currentX = e.clientX - startX;
+                const currentY = e.clientY - startY;
+                img.dataset.posX = currentX; img.dataset.posY = currentY;
+                img.style.transform = `translate(${currentX}px, ${currentY}px) scale(${img.dataset.scale})`;
+            });
+            document.addEventListener('mouseup', () => { activeMove = false; });
+            zone.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                let currentScale = parseFloat(img.dataset.scale);
+                currentScale = (e.deltaY < 0) ? currentScale + 0.05 : Math.max(0.1, currentScale - 0.05);
+                img.dataset.scale = currentScale;
+                img.style.transform = `translate(${img.dataset.posX}px, ${img.dataset.posY}px) scale(${currentScale})`;
+            });
+        }
+
+        function updateColorFromPicker(picker, textInputId) {
+            const chosenColor = picker.value;
+            document.getElementById(textInputId).value = chosenColor.toUpperCase();
+            picker.parentElement.style.backgroundColor = chosenColor;
+        }
+
+        function updateColorFromText(textInput) {
+            let enteredColor = textInput.value.trim();
+            if(!enteredColor.startsWith('#')) enteredColor = '#' + enteredColor;
+            if(/^#[0-9A-F]{6}$/i.test(enteredColor)) {
+                textInput.value = enteredColor.toUpperCase();
+                textInput.previousElementSibling.style.backgroundColor = enteredColor;
+                const innerColorInput = textInput.previousElementSibling.querySelector('input[type="color"]');
+                if(innerColorInput) innerColorInput.value = enteredColor;
+            }
+        }
+
+        function changeMicColor(picker, charNum) {
+            picker.closest('.top-speech-bubble').style.setProperty('--mic-color', picker.value);
+        }
+
+        function addNewPaletteItem() {
+            paletteCounts[currentTargetChar]++;
+            rebuildPaletteItem(currentTargetChar, `c${currentTargetChar}-color-${paletteCounts[currentTargetChar]}`, '#cccccc');
+            saveToLocalStorage();
+        }
+
+        // 🎯 1. 버그 수정: 기본 영구 팔레트에 엑스(삭제) 버튼 없도록 분기
+        function rebuildPaletteItem(charNum, id, colorHex, isPermanent = false) {
+            const newItem = document.createElement('div');
+            newItem.className = 'color-item';
+            if (isPermanent) newItem.dataset.permanent = 'true';
+            
+            const delBtn = isPermanent ? '' : `<button class="palette-del-btn" onclick="this.parentElement.remove(); saveToLocalStorage();">×</button>`;
+
+            newItem.innerHTML = `
+                ${delBtn}
+                <div class="color-preview" style="background-color: ${colorHex};"><input type="color" value="${colorHex}" oninput="updateColorFromPicker(this, '${id}')"></div>
+                <input type="text" id="${id}" class="color-code-input" value="${colorHex.toUpperCase()}" onchange="updateColorFromText(this)">
+            `;
+            document.getElementById(`c${charNum}-palette-row`).appendChild(newItem);
+            newItem.querySelectorAll('input').forEach(input => input.addEventListener('input', saveToLocalStorage));
+        }
+
+        function createNewSticker(event) {
+            const selectedFile = event.target.files[0];
+            if (selectedFile) {
+                const fileReader = new FileReader();
+                fileReader.onload = function(e) {
+                    const sticker = document.createElement('div');
+                    sticker.className = 'draggable-sticker';
+                    sticker.style.left = '100px'; sticker.style.top = '250px'; sticker.style.width = '180px';
+                    sticker.dataset.angle = 0; 
+                    sticker.innerHTML = `<img src="${e.target.result}"><button class="delete-sticker-btn" onclick="this.parentElement.remove()">×</button><div class="rotate-sticker-handle" title="회전">🔄</div><div class="resize-sticker-handle" title="크기"></div>`;
+                    document.getElementById('main-canvas').appendChild(sticker);
+                    
+                    let isDragging = false, isResizing = false, isRotating = false, diffX = 0, diffY = 0, startWidth = 0, startMouseX = 0, centerPointX = 0, centerPointY = 0;
+                    sticker.addEventListener('mousedown', function(dragEvent) {
+                        if (['delete-sticker-btn', 'resize-sticker-handle', 'rotate-sticker-handle'].includes(dragEvent.target.className)) return;
+                        isDragging = true; diffX = dragEvent.clientX - sticker.offsetLeft; diffY = dragEvent.clientY - sticker.offsetTop;
+                        dragEvent.preventDefault();
+                    });
+                    sticker.querySelector('.resize-sticker-handle').addEventListener('mousedown', function(resizeEvent) { isResizing = true; startWidth = sticker.clientWidth; startMouseX = resizeEvent.clientX; resizeEvent.preventDefault(); resizeEvent.stopPropagation(); });
+                    sticker.querySelector('.rotate-sticker-handle').addEventListener('mousedown', function(rotateEvent) { isRotating = true; const rect = sticker.getBoundingClientRect(); centerPointX = rect.left + rect.width / 2; centerPointY = rect.top + rect.height / 2; rotateEvent.preventDefault(); rotateEvent.stopPropagation(); });
+                    document.addEventListener('mousemove', function(moveEvent) {
+                        if (isDragging) { sticker.style.left = `${moveEvent.clientX - diffX}px`; sticker.style.top = `${moveEvent.clientY - diffY}px`; }
+                        if (isResizing) { sticker.style.width = `${Math.max(30, startWidth + (moveEvent.clientX - startMouseX))}px`; }
+                        if (isRotating) { let angleDegrees = Math.atan2(moveEvent.clientY - centerPointY, moveEvent.clientX - centerPointX) * (180 / Math.PI) + 45; sticker.dataset.angle = angleDegrees; sticker.style.transform = `rotate(${angleDegrees}deg)`; }
+                    });
+                    document.addEventListener('mouseup', function() { isDragging = isResizing = isRotating = false; });
+                };
+                fileReader.readAsDataURL(selectedFile);
+            }
+        }
+
+        function setupAutoSaveListeners() {
+            document.querySelectorAll('input[type="text"], textarea, input[type="range"], input[type="color"], input[type="radio"], input[type="checkbox"]').forEach(element => {
+                element.addEventListener('input', saveToLocalStorage); element.addEventListener('change', saveToLocalStorage);
+            });
+        }
+
+        function changeDescFontSize(val) {
+            document.getElementById('font-slider').value = val; document.getElementById('font-val').innerText = val + 'px';
+            document.documentElement.style.setProperty('--desc-font-size', val + 'px');
+        }
+
+        function resetCanvasData() {
+            if(confirm("모든 프로필 정보와 세팅이 초기화됩니다. 진행할까요?")) {
+                localStorage.removeItem('trpg_4party_halfbody_v3_data'); window.location.reload();
+            }
+        }
+
+        function saveTemplateAsImage(format = 'png') {
+            const canvasElement = document.getElementById('main-canvas');
+            const originalTransform = canvasElement.style.transform;
+            const originalMargin = canvasElement.style.marginRight;
+            canvasElement.style.transform = 'none'; canvasElement.style.marginRight = '0px';
+
+            const inputs = canvasElement.querySelectorAll('input[type="text"]');
+            const savedTransfers = [];
+            const currentFontType = document.querySelector('input[name="font-style-choice"]:checked')?.value;
+
+            inputs.forEach(input => {
+                if(input.classList.contains('color-code-input')) return;
+                const textSpan = document.createElement('div');
+                textSpan.innerText = input.value;
+                textSpan.style.fontFamily = getComputedStyle(input).fontFamily;
+                textSpan.style.fontSize = getComputedStyle(input).fontSize;
+                textSpan.style.fontWeight = getComputedStyle(input).fontWeight;
+                textSpan.style.color = getComputedStyle(input).color;
+                textSpan.style.textAlign = input.closest('.desc-list') ? 'left' : 'center';
+                textSpan.style.justifyContent = input.closest('.desc-list') ? 'flex-start' : 'center';
+                textSpan.style.width = input.offsetWidth + 'px';
+                textSpan.style.height = input.offsetHeight + 'px';
+                textSpan.style.display = 'flex'; textSpan.style.alignItems = 'center';
+
+                if(currentFontType === 'sans' && !input.closest('.desc-list')) {
+                    textSpan.style.position = 'relative'; textSpan.style.top = '-1.5px'; 
+                }
+
+                input.parentNode.insertBefore(textSpan, input); input.style.display = 'none';
+                savedTransfers.push({ originalInput: input, temporarySpan: textSpan });
+            });
+
+            const textareasTransfers = [];
+            for(let i=1; i<=4; i++) {
+                const textarea = document.getElementById(`c${i}-input-speech`);
+                if(textarea && getComputedStyle(document.getElementById(`c${i}-speech-bubble-layer`)).opacity !== "0") {
+                    const textDiv = document.createElement('div');
+                    textDiv.innerText = textarea.value;
+                    textDiv.style.fontFamily = getComputedStyle(textarea).fontFamily;
+                    textDiv.style.fontSize = getComputedStyle(textarea).fontSize;
+                    textDiv.style.fontWeight = getComputedStyle(textarea).fontWeight;
+                    textDiv.style.color = getComputedStyle(textarea).color;
+                    textDiv.style.textAlign = 'center'; textDiv.style.width = '100%';
+                    textDiv.style.height = textarea.offsetHeight + 'px';
+                    textDiv.style.display = 'flex'; textDiv.style.alignItems = 'center'; textDiv.style.justifyContent = 'center';
+                    
+                    if(currentFontType === 'sans') {
+                        textDiv.style.position = 'relative'; textDiv.style.top = '-1.5px';
+                    }
+
+                    textarea.parentNode.insertBefore(textDiv, textarea); textarea.style.display = 'none';
+                    textareasTransfers.push({ originalInput: textarea, temporarySpan: textDiv });
+                }
+            }
+
+            canvasElement.classList.add('hide-on-save');
+
+            setTimeout(() => {
+                html2canvas(canvasElement, {
+                    scale: 2, 
+                    useCORS: true, 
+                    backgroundColor: "#ffffff", 
+                    logging: false, 
+                    width: canvasElement.offsetWidth, 
+                    height: canvasElement.offsetHeight
+                }).then(canvas => {
+                    const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png';
+                    const downloadLink = document.createElement('a');
+                    const memberCnt = document.querySelector('input[name="member-count-choice"]:checked').value;
+                    downloadLink.download = `${memberCnt}인_반신_가변커미션틀.${format === 'jpeg' ? 'jpg' : 'png'}`;
+                    downloadLink.href = canvas.toDataURL(mimeType, 0.95); downloadLink.click();
+
+                    canvasElement.classList.remove('hide-on-save');
+                    savedTransfers.forEach(item => { item.temporarySpan.remove(); item.originalInput.style.display = ''; });
+                    textareasTransfers.forEach(item => { item.temporarySpan.remove(); item.originalInput.style.display = ''; });
+                    canvasElement.style.transform = originalTransform; canvasElement.style.marginRight = originalMargin;
+                }).catch(err => {
+                    canvasElement.classList.remove('hide-on-save');
+                    savedTransfers.forEach(item => { item.temporarySpan.remove(); item.originalInput.style.display = ''; });
+                    textareasTransfers.forEach(item => { item.temporarySpan.remove(); item.originalInput.style.display = ''; });
+                    canvasElement.style.transform = originalTransform; canvasElement.style.marginRight = originalMargin;
+                });
+            }, 100); 
+        }
+
+        window.addEventListener('resize', autoResponsiveScale);
+        window.addEventListener('DOMContentLoaded', loadFromLocalStorage);
+    </script>
+</body>
+</html>
