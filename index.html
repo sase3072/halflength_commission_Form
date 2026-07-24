@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>가변형 다인원 반신 커미션 폼 (2인/3인/4인 지원)</title>
+    <title>다인원 반신 커미션 폼 TEST</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
@@ -33,7 +33,7 @@
         .workspace-container { display: flex; gap: 18px; max-width: 100%; justify-content: center; align-items: flex-start; margin-top: 10px; }
 
         /* 사이드바 패널 */
-        .sidebar-panel { width: 240px; min-width: 230px; background: #ffffff; padding: 18px; border-radius: 16px; box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02); display: flex; flex-direction: column; gap: 14px; height: calc(100vh - 40px); max-height: 1000px; border: 1px solid var(--border-color); overflow-y: auto; flex-shrink: 0; position: sticky; top: 20px; }
+        .sidebar-panel { width: 240px; min-width: 230px; background: #ffffff; padding: 18px; border-radius: 16px; box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02); display: flex; flex-direction: column; gap: 14px; height: calc(100vh - 40px); max-height: 1000px; border: 1px solid var(--border-color); overflow-y: auto; flex-shrink: 0; position: sticky; top: 20px; transition: all 0.3s ease; }
         .sidebar-panel::-webkit-scrollbar { width: 4px; }
         .sidebar-panel::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
         .panel-title { font-size: 13px; font-weight: 800; color: #0f172a; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -76,8 +76,8 @@
         .sidebar-tag-input:focus { border-color: #cbd5e1; background: #ffffff; }
         .sidebar-color-picker { width: 28px; height: 16px; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer; padding: 0; background: none; }
 
-        /* 🎯 메인 캔버스 기본 규격 (자바스크립트가 인원수에 따라 넓이 동적 제어) */
-        .template-outer { position: relative; width: 1800px; height: 1000px; background: var(--card-bg); box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08); overflow: hidden; border-radius: 20px; flex-shrink: 0; border: 1px solid var(--border-color); display: flex; padding: 30px 20px; gap: 20px; transform-origin: top left; transition: height 0.3s ease, width 0.3s ease; }
+        /* 🎯 메인 캔버스 기본 규격 */
+        .template-outer { position: relative; width: 2240px; height: 1000px; background: var(--card-bg); box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08); overflow: hidden; border-radius: 20px; flex-shrink: 0; border: 1px solid var(--border-color); display: flex; padding: 30px 20px; gap: 20px; transform-origin: top left; transition: height 0.3s ease, width 0.3s ease; }
         .credit-tag { position: absolute; top: 12px; right: 16px; font-size: 11px; font-weight: 700; color: #cbd5e1; letter-spacing: 0.5px; z-index: 100; }
 
         /* 캐릭터 독립 열 */
@@ -88,7 +88,7 @@
         .tag-list { display: flex; flex-direction: row; gap: 6px; width: 100%; transition: opacity 0.2s ease; justify-content: center; }
         .tag-item { flex: 1; height: 26px; color: white; font-size: 11px; display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; font-weight: 700; border-radius: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 2px 4px rgba(0,0,0,0.05); background: linear-gradient(90deg, #8e959c, rgba(142, 149, 156, 0)); }
 
-        /* 한마디 말풍선 레이아웃 */
+        /* 한마디 말풍선 */
         .top-speech-bubble { width: 100%; height: 50px; display: flex; align-items: center; gap: 6px; padding: 4px 10px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; box-shadow: 0 4px 12px rgba(15,23,42,0.04); transition: opacity 0.2s ease; flex-shrink: 0; }
         .mic-icon-wrapper { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; flex-shrink: 0; }
         .mic-icon-wrapper input[type="color"] { position: absolute; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
@@ -99,15 +99,13 @@
         .speech-input.line-mode-1 { height: 20px; line-height: 20px; }
         .speech-input.line-mode-2 { height: 40px; line-height: 1.4; }
 
-        /* 업로드 공통 존 구역 */
+        /* 업로드 구역 */
         .upload-zone { position: relative; overflow: hidden; display: flex; justify-content: center; align-items: center; background: #f8fafc; border: 2px dashed #cbd5e1; transition: background 0.2s; }
         .upload-zone:hover { background: #f1f5f9; }
         .upload-zone input[type="file"] { display: none; }
         .upload-zone img { position: absolute; min-width: 100%; min-height: 100%; object-fit: cover; cursor: move; user-select: none; transform-origin: center center; }
         .placeholder-text { color: #94a3b8; text-align: center; font-size: 12px; z-index: 1; padding: 2px; pointer-events: none; line-height: 1.3; }
         .upload-hint { position: absolute; bottom: 5px; right: 5px; font-size: 9px; color: #94a3b8; background: rgba(255,255,255,0.8); padding: 2px 4px; border-radius: 3px; pointer-events: none; z-index: 2; }
-
-        /* 🎯 메인 두상 박스 (가로 320px, 세로 500px 반영) */
         .main-headshot-box { width: 320px; height: 500px; border-radius: 18px; flex-shrink: 0; box-shadow: 0 8px 20px rgba(15,23,42,0.06); }
 
         .palette-container { width: 320px; flex-shrink: 0; margin-top: 4px; }
@@ -158,9 +156,8 @@
         .hide-on-save .desc-list { overflow: visible !important; }
         .hide-on-save .character-column { box-shadow: none !important; background-color: transparent !important; }
 
-        /* 🎯 라디오 버튼 그리드 정렬 (버튼 크기 완벽 통일) */
+        /* 라디오 버튼 그리드 정렬 */
         .char-select-box, .line-select-box, .icon-select-box, .font-select-box { display: grid; gap: 4px; background: #f1f5f9; padding: 4px; border-radius: 8px; border: 1px solid #e2e8f0; }
-        .char-select-box { grid-template-columns: repeat(4, 1fr); }
         .line-select-box { grid-template-columns: repeat(2, 1fr); }
         .icon-select-box { grid-template-columns: repeat(3, 1fr); }
         .font-select-box { grid-template-columns: repeat(2, 1fr); }
@@ -168,9 +165,16 @@
         .char-select-label, .line-select-label, .icon-select-label, .font-select-label { text-align: center; font-size: 11px; padding: 6px 0; background: transparent; border: none; border-radius: 6px; cursor: pointer; font-weight: 700; color: #64748b; transition: all 0.15s ease; width: 100%; box-sizing: border-box; }
         .char-select-label input, .line-select-label input, .icon-select-label input, .font-select-label input { display: none; }
         .char-select-label:has(input:checked), .line-select-label:has(input:checked), .icon-select-label:has(input:checked), .font-select-label:has(input:checked) { background: #ffffff; color: #0f172a; box-shadow: 0 2px 4px rgba(15,23,42,0.05); }
+
+        /* 🎯 [신규] 사이드바 토글 플로팅 버튼 */
+        .floating-toggle-btn { position: fixed; bottom: 30px; right: 30px; background: #0f172a; color: white; border: none; padding: 12px 20px; border-radius: 30px; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2); z-index: 9999; transition: all 0.2s; }
+        .floating-toggle-btn:hover { background: #1e293b; transform: translateY(-2px); }
     </style>
 </head>
 <body>
+
+    <!-- 🎯 [신규] 플로팅 메뉴 숨기기 버튼 -->
+    <button class="floating-toggle-btn" id="floating-sidebar-toggle" onclick="toggleSidebars()">👁️ 양쪽 메뉴 숨기기 (단축키 M)</button>
 
     <div class="workspace-container">
         
@@ -178,25 +182,25 @@
         <div class="sidebar-panel">
             <div class="panel-title">⚙️ 컴포넌트 세팅</div>
 
-            <!-- 🎯 [신규] 캔버스 인원수 다이나믹 설정 -->
             <div class="sidebar-section">
                 <div class="sidebar-title">👥 캔버스 인원수 설정</div>
-                <div class="char-select-box" style="grid-template-columns: repeat(3, 1fr);">
+                <div class="char-select-box" style="grid-template-columns: repeat(4, 1fr);">
                     <label class="char-select-label"><input type="radio" name="member-count-choice" value="2" onchange="changeMemberCount(this.value)">2인</label>
                     <label class="char-select-label"><input type="radio" name="member-count-choice" value="3" onchange="changeMemberCount(this.value)">3인</label>
-                    <label class="char-select-label"><input type="radio" name="member-count-choice" value="4" checked onchange="changeMemberCount(this.value)">4인</label>
+                    <label class="char-select-label"><input type="radio" name="member-count-choice" value="4" onchange="changeMemberCount(this.value)">4인</label>
+                    <label class="char-select-label"><input type="radio" name="member-count-choice" value="5" checked onchange="changeMemberCount(this.value)">5인</label>
                 </div>
-                <span style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">💡 화면 가로 길이가 자동으로 조절됩니다.</span>
             </div>
 
             <!-- 타겟 캐릭터 집중 선택 -->
             <div class="sidebar-section">
                 <div class="sidebar-title">🎯 편집 중인 캐릭터</div>
-                <div class="char-select-box" id="char-btn-grid">
+                <div class="char-select-box" id="char-btn-grid" style="grid-template-columns: repeat(5, 1fr);">
                     <label class="char-select-label" id="lbl-char-1"><input type="radio" name="target-char-choice" value="1" checked onchange="switchTargetCharacter(this.value)">1번</label>
                     <label class="char-select-label" id="lbl-char-2"><input type="radio" name="target-char-choice" value="2" onchange="switchTargetCharacter(this.value)">2번</label>
                     <label class="char-select-label" id="lbl-char-3"><input type="radio" name="target-char-choice" value="3" onchange="switchTargetCharacter(this.value)">3번</label>
                     <label class="char-select-label" id="lbl-char-4"><input type="radio" name="target-char-choice" value="4" onchange="switchTargetCharacter(this.value)">4번</label>
+                    <label class="char-select-label" id="lbl-char-5"><input type="radio" name="target-char-choice" value="5" onchange="switchTargetCharacter(this.value)">5번</label>
                 </div>
             </div>
 
@@ -261,7 +265,7 @@
             </div>
         </div>
 
-        <!-- [중앙 영역] 4인 두상 맞춤형 대형 캔버스 -->
+        <!-- [중앙 영역] 5인 두상 맞춤형 대형 캔버스 -->
         <div class="template-outer" id="main-canvas">
             <div class="credit-tag">@sa_se372</div>
             
@@ -285,17 +289,13 @@
                     </div>
                 </div>
 
-                <!-- 🎯 반신 메인 320x500 -->
                 <div class="upload-zone main-headshot-box" id="c1-bust-upload-zone" ondblclick="triggerFileInput(this)">
                     <div class="placeholder-text">더블클릭<br>반신 이미지 업로드</div><span class="upload-hint">클릭</span>
                     <input type="file" accept="image/*" onchange="displayUploadedImage(event, this)">
                 </div>
 
-                <!-- 프로필 정보 영역 -->
                 <div class="palette-container">
-                    <div class="palette-row" id="c1-palette-row">
-                        <!-- JS에서 동적으로 팔레트 생성됨 -->
-                    </div>
+                    <div class="palette-row" id="c1-palette-row"></div>
                 </div>
                 <div class="profile-info">
                     <div class="name-container-vertical"><input type="text" class="input-name" id="c1-input-name" value="캐릭터 1"><input type="text" class="input-hanja" id="c1-input-hanja" value="Character 01"></div>
@@ -408,6 +408,41 @@
                     <div class="desc-list-wrapper"><ul class="desc-list" id="c4-desc-container"></ul><button class="row-add-btn" onclick="addDescRow(4)">+ 상세 설명 추가</button></div>
                 </div>
             </div>
+            
+            <!-- 캐릭터 5 -->
+            <div class="character-column" id="char-col-5" onclick="handleColClick('5')">
+                <div class="tag-list" id="c5-tag-list-layer">
+                    <div id="c5-tag-item-1" class="tag-item">성격 키워드 1</div>
+                    <div id="c5-tag-item-2" class="tag-item">성격 키워드 2</div>
+                    <div id="c5-tag-item-3" class="tag-item">성격 키워드 3</div>
+                </div>
+                
+                <div class="top-speech-bubble" id="c5-speech-bubble-layer">
+                    <div class="mic-icon-wrapper" title="아이콘 색상">
+                        <svg class="mic-svg active icon-mic" viewBox="0 0 24 24"><rect x="11" y="19" width="2" height="2" /><rect x="6" y="20" width="12" height="2" rx="1" /><path d="M4,10 v1 a8,8 0 0,0 16,0 v-1 h-2 v1 a6,6 0 0,1 -12,0 v-1 z" /><rect x="7.5" y="2" width="9" height="13" rx="4.5" /></svg>
+                        <svg class="mic-svg icon-quote" viewBox="0 0 24 24"><path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/></svg>
+                        <svg class="mic-svg icon-smile" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2" fill="none" style="stroke: var(--mic-color);"/><circle cx="8.5" cy="9.5" r="1.5"/><circle cx="15.5" cy="9.5" r="1.5"/><path d="M8 14.5s2.5 3 4 3 4-3 4-3" stroke-width="2" stroke-linecap="round" fill="none" style="stroke: var(--mic-color);"/></svg>
+                        <input type="color" value="#475569" oninput="changeMicColor(this, 5)">
+                    </div>
+                    <div class="speech-input-wrapper">
+                        <textarea class="speech-input line-mode-1" id="c5-input-speech" placeholder="한마디 입력"></textarea>
+                    </div>
+                </div>
+
+                <div class="upload-zone main-headshot-box" id="c5-bust-upload-zone" ondblclick="triggerFileInput(this)">
+                    <div class="placeholder-text">더블클릭<br>반신 이미지 업로드</div><span class="upload-hint">클릭</span>
+                    <input type="file" accept="image/*" onchange="displayUploadedImage(event, this)">
+                </div>
+
+                <div class="palette-container">
+                    <div class="palette-row" id="c5-palette-row"></div>
+                </div>
+                <div class="profile-info">
+                    <div class="name-container-vertical"><input type="text" class="input-name" id="c5-input-name" value="캐릭터 5"><input type="text" class="input-hanja" id="c5-input-hanja" value="Character 05"></div>
+                    <div class="spec-dynamic-row" id="c5-spec-container"></div>
+                    <div class="desc-list-wrapper"><ul class="desc-list" id="c5-desc-container"></ul><button class="row-add-btn" onclick="addDescRow(5)">+ 상세 설명 추가</button></div>
+                </div>
+            </div>
 
         </div>
 
@@ -416,6 +451,19 @@
             <div class="panel-title">🛠️ 유틸리티 도구</div>
             
             <div class="btn-group-vertical">
+                
+                <!-- 🎯 [신규] 화면 자동 축소 ON/OFF 토글 -->
+                <div class="sidebar-section">
+                    <div class="sidebar-title">
+                        <span style="color:#0f172a;">🔍 캔버스 자동 맞춤</span>
+                        <label class="toggle-label">
+                            <input type="checkbox" checked class="toggle-input" id="auto-scale-toggle" onchange="autoResponsiveScale()">
+                            <div class="toggle-switch"></div>
+                        </label>
+                    </div>
+                    <span style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">※ 끄면 100% 원본 크기로 커집니다.</span>
+                </div>
+
                 <!-- 하단 여백 조절 슬라이더 -->
                 <div class="font-size-control-vertical" style="background: #e0f2fe; border-color: #bae6fd;">
                     <span>↕️ 캔버스 하단 여백 조절</span>
@@ -459,11 +507,11 @@
 
     <script>
         let currentTargetChar = "1"; 
-        let paletteCounts = { "1": 2, "2": 2, "3": 2, "4": 2 };
+        let paletteCounts = { "1": 2, "2": 2, "3": 2, "4": 2, "5": 2 };
         let charSettings = {};
 
         function initCharSettings() {
-            for(let i=1; i<=4; i++) {
+            for(let i=1; i<=5; i++) {
                 charSettings[`char_${i}`] = {
                     tagVisible: true,
                     bubbleVisible: true,
@@ -478,18 +526,37 @@
             }
         }
 
-        // 🎯 캔버스 인원수 (2, 3, 4) 동적 변경 함수
+        // 🎯 [신규] 사이드바 토글 기능
+        function toggleSidebars() {
+            const sidebars = document.querySelectorAll('.sidebar-panel');
+            const btn = document.getElementById('floating-sidebar-toggle');
+            const isHidden = sidebars[0].style.display === 'none';
+            
+            sidebars.forEach(sb => sb.style.display = isHidden ? 'flex' : 'none');
+            btn.innerHTML = isHidden ? '👁️ 양쪽 메뉴 숨기기 (단축키 M)' : '👁️ 양쪽 메뉴 보이기 (단축키 M)';
+            
+            // 토글 후 화면 스케일 재계산
+            setTimeout(autoResponsiveScale, 100);
+        }
+
+        // 🎯 [신규] 단축키 'M' 적용
+        document.addEventListener('keydown', (e) => {
+            // 입력창에서 타이핑 중일 때는 단축키 무시
+            if (e.key.toLowerCase() === 'm' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                toggleSidebars();
+            }
+        });
+
         function changeMemberCount(val) {
             const count = parseInt(val);
             const canvas = document.getElementById('main-canvas');
             
-            // 인원수에 따른 메인 캔버스 폭 지정
             if (count === 2) canvas.style.width = '920px'; 
             else if (count === 3) canvas.style.width = '1360px';
-            else canvas.style.width = '1800px';
+            else if (count === 4) canvas.style.width = '1800px';
+            else canvas.style.width = '2240px';
 
-            // 열(Column) 활성화/비활성화 처리
-            for(let i=1; i<=4; i++) {
+            for(let i=1; i<=5; i++) {
                 const col = document.getElementById(`char-col-${i}`);
                 const btn = document.getElementById(`lbl-char-${i}`);
                 if(i <= count) {
@@ -501,31 +568,38 @@
                 }
             }
 
-            // CSS 그리드 박스 배열 형태 자동 갱신
             document.getElementById('char-btn-grid').style.gridTemplateColumns = `repeat(${count}, 1fr)`;
-
-            // 점선 우측 테두리 로직 처리 (마지막 보이는 열의 테두리 없애기)
             document.querySelectorAll('.character-column').forEach(c => c.style.borderRight = '1px dashed var(--border-color)');
             document.getElementById(`char-col-${count}`).style.borderRight = 'none';
             
-            // 현재 타겟이 숨겨진 캐릭터일 경우 1번으로 강제 이동
             if (parseInt(currentTargetChar) > count) handleColClick('1');
 
             saveToLocalStorage();
             setTimeout(autoResponsiveScale, 100); 
         }
 
-        // 반응형 스케일 오토 매칭 엔진
+        // 🎯 [수정] 줌 제어 토글 연동 반응형 엔진
         function autoResponsiveScale() {
             const canvas = document.getElementById('main-canvas');
             const container = document.querySelector('.workspace-container');
+            const isAutoScaleOn = document.getElementById('auto-scale-toggle').checked; // 토글 상태 확인
+            const sidebarsHidden = document.querySelectorAll('.sidebar-panel')[0].style.display === 'none'; // 패널 가려짐 상태 확인
+            
             if(!canvas || !container) return;
             
-            const paddingGapWidth = 400; // 사이드바 공간 고려
-            const availableWidth = window.innerWidth - paddingGapWidth;
-            const currentCanvasWidth = parseInt(canvas.style.width) || 1800; // 현재 인원수 모드에 따른 넓이
+            // 💡 자동 맞춤이 꺼져있으면 무조건 원본 크기(scale 1) 유지
+            if (!isAutoScaleOn) {
+                canvas.style.transform = 'none';
+                canvas.style.marginRight = '0px';
+                return;
+            }
             
-            if (availableWidth < currentCanvasWidth && availableWidth > 400) {
+            // 메뉴 패널이 숨겨져 있으면 여유 공간(paddingGapWidth)을 줄여서 캔버스를 더 크게 보여줌
+            const paddingGapWidth = sidebarsHidden ? 60 : 500; 
+            const availableWidth = window.innerWidth - paddingGapWidth;
+            const currentCanvasWidth = parseInt(canvas.style.width) || 2240; 
+            
+            if (availableWidth < currentCanvasWidth && availableWidth > 300) {
                 const scaleFactor = availableWidth / currentCanvasWidth;
                 canvas.style.transform = `scale(${scaleFactor})`;
                 const computedCollapsedWidth = currentCanvasWidth * scaleFactor;
@@ -534,9 +608,9 @@
                 canvas.style.transform = 'none';
                 canvas.style.marginRight = '0px';
             }
+            saveToLocalStorage(); // 스케일 토글 상태를 저장하기 위해 추가
         }
 
-        // 캔버스 세로 확장 높이 조절
         function changeCanvasHeight(val) {
             document.getElementById('height-slider').value = val;
             document.getElementById('height-val').innerText = val + 'px';
@@ -576,12 +650,11 @@
 
         function saveToLocalStorage() {
             const data = { charSettings: charSettings };
-            for(let i=1; i<=4; i++) {
+            for(let i=1; i<=5; i++) {
                 const specInputs = document.querySelectorAll(`#c${i}-spec-container .input-spec-field`);
                 const specValues = [];
                 specInputs.forEach(input => specValues.push(input.value));
 
-                // 🎯 2. 버그 수정: 영구(기본) 팔레트도 색상 변경 값을 함께 저장하도록 조치
                 const savedPalettes = [];
                 document.querySelectorAll(`#c${i}-palette-row .color-item`).forEach((item) => {
                     const inputColor = item.querySelector('input[type="text"]');
@@ -602,16 +675,17 @@
                 fontChoice: document.querySelector('input[name="font-style-choice"]:checked')?.value || 'sans',
                 fontSize: document.getElementById('font-slider').value,
                 canvasExt: document.getElementById('height-slider').value,
-                memberCount: document.querySelector('input[name="member-count-choice"]:checked')?.value || '4'
+                memberCount: document.querySelector('input[name="member-count-choice"]:checked')?.value || '5',
+                autoScale: document.getElementById('auto-scale-toggle').checked // 줌 상태 저장
             };
-            localStorage.setItem('trpg_4party_halfbody_v3_data', JSON.stringify(data));
+            localStorage.setItem('trpg_multi_halfbody_v5_data', JSON.stringify(data));
         }
 
         function loadFromLocalStorage() {
             initCharSettings();
-            const savedDataString = localStorage.getItem('trpg_4party_halfbody_v3_data');
+            const savedDataString = localStorage.getItem('trpg_multi_halfbody_v5_data');
             
-            for(let i=1; i<=4; i++) {
+            for(let i=1; i<=5; i++) {
                 document.getElementById(`c${i}-desc-container`).innerHTML = '';
                 document.getElementById(`c${i}-spec-container`).innerHTML = '';
                 document.getElementById(`c${i}-palette-row`).innerHTML = '';
@@ -638,11 +712,16 @@
                             if(countRadio) countRadio.checked = true;
                             changeMemberCount(g.memberCount);
                         } else {
-                            changeMemberCount('4');
+                            changeMemberCount('5');
+                        }
+
+                        // 스케일 설정 불러오기
+                        if(g.autoScale !== undefined) {
+                            document.getElementById('auto-scale-toggle').checked = g.autoScale;
                         }
                     }
 
-                    for(let i=1; i<=4; i++) {
+                    for(let i=1; i<=5; i++) {
                         const cData = data[`char_${i}`];
                         if(cData) {
                             document.getElementById(`c${i}-input-speech`).value = cData.speech || '';
@@ -657,7 +736,6 @@
                                 cData.specs.forEach(val => createSpecBoxNode(i, val));
                             } else { buildInitialSpecsLayout(i); }
 
-                            // 팔레트 복구 (수정된 로직)
                             if(cData.palettes && cData.palettes.length > 0) {
                                 cData.palettes.forEach(p => rebuildPaletteItem(i, p.id, p.color, p.isPermanent));
                                 paletteCounts[i] = cData.palettes.length;
@@ -669,8 +747,8 @@
                         }
                         applyConfigToDOM(i);
                     }
-                } catch(e) { fallbackDefaults(); changeMemberCount('4'); }
-            } else { fallbackDefaults(); changeMemberCount('4'); }
+                } catch(e) { fallbackDefaults(); changeMemberCount('5'); }
+            } else { fallbackDefaults(); changeMemberCount('5'); }
             
             switchTargetCharacter("1");
             setupAutoSaveListeners();
@@ -678,7 +756,7 @@
         }
 
         function fallbackDefaults() {
-            for(let i=1; i<=4; i++) {
+            for(let i=1; i<=5; i++) {
                 provideDefaultRows(i);
                 buildInitialSpecsLayout(i);
                 provideDefaultPalettes(i);
@@ -903,7 +981,6 @@
             saveToLocalStorage();
         }
 
-        // 🎯 1. 버그 수정: 기본 영구 팔레트에 엑스(삭제) 버튼 없도록 분기
         function rebuildPaletteItem(charNum, id, colorHex, isPermanent = false) {
             const newItem = document.createElement('div');
             newItem.className = 'color-item';
@@ -964,7 +1041,7 @@
 
         function resetCanvasData() {
             if(confirm("모든 프로필 정보와 세팅이 초기화됩니다. 진행할까요?")) {
-                localStorage.removeItem('trpg_4party_halfbody_v3_data'); window.location.reload();
+                localStorage.removeItem('trpg_multi_halfbody_v5_data'); window.location.reload();
             }
         }
 
@@ -1001,7 +1078,7 @@
             });
 
             const textareasTransfers = [];
-            for(let i=1; i<=4; i++) {
+            for(let i=1; i<=5; i++) {
                 const textarea = document.getElementById(`c${i}-input-speech`);
                 if(textarea && getComputedStyle(document.getElementById(`c${i}-speech-bubble-layer`)).opacity !== "0") {
                     const textDiv = document.createElement('div');
@@ -1022,6 +1099,11 @@
                     textareasTransfers.push({ originalInput: textarea, temporarySpan: textDiv });
                 }
             }
+
+            // 숨겨진 사이드바 임시 복구 (에러 방지용)
+            const sidebars = document.querySelectorAll('.sidebar-panel');
+            const wasHidden = sidebars[0].style.display === 'none';
+            if (wasHidden) sidebars.forEach(sb => sb.style.display = 'flex');
 
             canvasElement.classList.add('hide-on-save');
 
@@ -1044,11 +1126,13 @@
                     savedTransfers.forEach(item => { item.temporarySpan.remove(); item.originalInput.style.display = ''; });
                     textareasTransfers.forEach(item => { item.temporarySpan.remove(); item.originalInput.style.display = ''; });
                     canvasElement.style.transform = originalTransform; canvasElement.style.marginRight = originalMargin;
+                    if (wasHidden) sidebars.forEach(sb => sb.style.display = 'none');
                 }).catch(err => {
                     canvasElement.classList.remove('hide-on-save');
                     savedTransfers.forEach(item => { item.temporarySpan.remove(); item.originalInput.style.display = ''; });
                     textareasTransfers.forEach(item => { item.temporarySpan.remove(); item.originalInput.style.display = ''; });
                     canvasElement.style.transform = originalTransform; canvasElement.style.marginRight = originalMargin;
+                    if (wasHidden) sidebars.forEach(sb => sb.style.display = 'none');
                 });
             }, 100); 
         }
