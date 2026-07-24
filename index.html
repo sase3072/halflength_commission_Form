@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>다인원 반신 커미션 폼 TEST</title>
+    <title>다인원 반신 커미션 폼</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
@@ -28,9 +28,10 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--main-font); font-weight: 500; }
-        body { background-color: var(--bg-color); color: var(--text-dark); display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px 10px; overflow-x: auto; overflow-y: auto; }
+        /* flex-start 적용으로 축소 시 좌측 잘림 현상 완화 */
+        body { background-color: var(--bg-color); color: var(--text-dark); display: flex; justify-content: flex-start; align-items: flex-start; min-height: 100vh; padding: 20px; overflow-x: auto; overflow-y: auto; }
 
-        .workspace-container { display: flex; gap: 18px; max-width: 100%; justify-content: center; align-items: flex-start; margin-top: 10px; }
+        .workspace-container { display: flex; gap: 18px; max-width: 100%; justify-content: center; align-items: flex-start; margin: 10px auto; }
 
         /* 사이드바 패널 */
         .sidebar-panel { width: 240px; min-width: 230px; background: #ffffff; padding: 18px; border-radius: 16px; box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02); display: flex; flex-direction: column; gap: 14px; height: calc(100vh - 40px); max-height: 1000px; border: 1px solid var(--border-color); overflow-y: auto; flex-shrink: 0; position: sticky; top: 20px; transition: all 0.3s ease; }
@@ -76,7 +77,7 @@
         .sidebar-tag-input:focus { border-color: #cbd5e1; background: #ffffff; }
         .sidebar-color-picker { width: 28px; height: 16px; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer; padding: 0; background: none; }
 
-        /* 🎯 메인 캔버스 기본 규격 */
+        /* 메인 캔버스 (동적으로 가로폭이 변함) */
         .template-outer { position: relative; width: 2240px; height: 1000px; background: var(--card-bg); box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08); overflow: hidden; border-radius: 20px; flex-shrink: 0; border: 1px solid var(--border-color); display: flex; padding: 30px 20px; gap: 20px; transform-origin: top left; transition: height 0.3s ease, width 0.3s ease; }
         .credit-tag { position: absolute; top: 12px; right: 16px; font-size: 11px; font-weight: 700; color: #cbd5e1; letter-spacing: 0.5px; z-index: 100; }
 
@@ -84,7 +85,7 @@
         .character-column { flex: 1; height: 100%; display: flex; flex-direction: column; align-items: center; position: relative; border-right: 1px dashed var(--border-color); padding: 0 15px; gap: 14px; cursor: pointer; transition: background-color 0.2s, box-shadow 0.2s; border-radius: 8px; }
         .character-column.active-target { background-color: #f8fafc; box-shadow: inset 0 0 0 2px #e2e8f0; }
 
-        /* 성격 키워드 수평 정렬 + 그라데이션 */
+        /* 성격 키워드 */
         .tag-list { display: flex; flex-direction: row; gap: 6px; width: 100%; transition: opacity 0.2s ease; justify-content: center; }
         .tag-item { flex: 1; height: 26px; color: white; font-size: 11px; display: flex; align-items: center; justify-content: flex-start; padding-left: 10px; font-weight: 700; border-radius: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 2px 4px rgba(0,0,0,0.05); background: linear-gradient(90deg, #8e959c, rgba(142, 149, 156, 0)); }
 
@@ -166,15 +167,17 @@
         .char-select-label input, .line-select-label input, .icon-select-label input, .font-select-label input { display: none; }
         .char-select-label:has(input:checked), .line-select-label:has(input:checked), .icon-select-label:has(input:checked), .font-select-label:has(input:checked) { background: #ffffff; color: #0f172a; box-shadow: 0 2px 4px rgba(15,23,42,0.05); }
 
-        /* 🎯 [신규] 사이드바 토글 플로팅 버튼 */
         .floating-toggle-btn { position: fixed; bottom: 30px; right: 30px; background: #0f172a; color: white; border: none; padding: 12px 20px; border-radius: 30px; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2); z-index: 9999; transition: all 0.2s; }
         .floating-toggle-btn:hover { background: #1e293b; transform: translateY(-2px); }
+        
+        /* 알림 모달 */
+        #toast-notification { position: fixed; bottom: 80px; right: 30px; background: #10b981; color: white; padding: 10px 20px; border-radius: 8px; font-size: 12px; font-weight: 700; opacity: 0; transition: opacity 0.3s; z-index: 10000; pointer-events: none; }
     </style>
 </head>
 <body>
 
-    <!-- 🎯 [신규] 플로팅 메뉴 숨기기 버튼 -->
     <button class="floating-toggle-btn" id="floating-sidebar-toggle" onclick="toggleSidebars()">👁️ 양쪽 메뉴 숨기기 (단축키 M)</button>
+    <div id="toast-notification">✅ 진행 상황이 안전하게 자동 저장되었습니다.</div>
 
     <div class="workspace-container">
         
@@ -185,11 +188,23 @@
             <div class="sidebar-section">
                 <div class="sidebar-title">👥 캔버스 인원수 설정</div>
                 <div class="char-select-box" style="grid-template-columns: repeat(4, 1fr);">
-                    <label class="char-select-label"><input type="radio" name="member-count-choice" value="2" onchange="changeMemberCount(this.value)">2인</label>
-                    <label class="char-select-label"><input type="radio" name="member-count-choice" value="3" onchange="changeMemberCount(this.value)">3인</label>
-                    <label class="char-select-label"><input type="radio" name="member-count-choice" value="4" onchange="changeMemberCount(this.value)">4인</label>
-                    <label class="char-select-label"><input type="radio" name="member-count-choice" value="5" checked onchange="changeMemberCount(this.value)">5인</label>
+                    <label class="char-select-label"><input type="radio" name="member-count-choice" value="2" onchange="updateColumnVisibility()">2인</label>
+                    <label class="char-select-label"><input type="radio" name="member-count-choice" value="3" onchange="updateColumnVisibility()">3인</label>
+                    <label class="char-select-label"><input type="radio" name="member-count-choice" value="4" onchange="updateColumnVisibility()">4인</label>
+                    <label class="char-select-label"><input type="radio" name="member-count-choice" value="5" checked onchange="updateColumnVisibility()">5인</label>
                 </div>
+            </div>
+
+            <!-- 🎯 개별 편집 모드 (Focus Mode) 추가 -->
+            <div class="sidebar-section" style="background: #f0fdf4; border-color: #bbf7d0;">
+                <div class="sidebar-title" style="color: #166534;">
+                    <span>🔍 개별 집중 편집 모드</span>
+                    <label class="toggle-label">
+                        <input type="checkbox" class="toggle-input" id="focus-mode-toggle" onchange="updateColumnVisibility()">
+                        <div class="toggle-switch"></div>
+                    </label>
+                </div>
+                <span style="font-size: 10px; color: #15803d; margin-top: 2px;">💡 해당 기능을 켰을 시 선택한 캔버스만 집중적으로 편집이 가능합니다. 기능을 끄면 원래 자리로 돌아갑니다.</span>
             </div>
 
             <!-- 타겟 캐릭터 집중 선택 -->
@@ -452,18 +467,6 @@
             
             <div class="btn-group-vertical">
                 
-                <!-- 🎯 [신규] 화면 자동 축소 ON/OFF 토글 -->
-                <div class="sidebar-section">
-                    <div class="sidebar-title">
-                        <span style="color:#0f172a;">🔍 캔버스 자동 맞춤</span>
-                        <label class="toggle-label">
-                            <input type="checkbox" checked class="toggle-input" id="auto-scale-toggle" onchange="autoResponsiveScale()">
-                            <div class="toggle-switch"></div>
-                        </label>
-                    </div>
-                    <span style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">※ 끄면 100% 원본 크기로 커집니다.</span>
-                </div>
-
                 <!-- 하단 여백 조절 슬라이더 -->
                 <div class="font-size-control-vertical" style="background: #e0f2fe; border-color: #bae6fd;">
                     <span>↕️ 캔버스 하단 여백 조절</span>
@@ -493,8 +496,8 @@
                     </div>
                 </div>
 
-                <button class="save-btn png-theme" style="margin-top: 10px;" onclick="saveTemplateAsImage('png')">🖼️ PNG 고화질 저장</button>
-                <button class="save-btn jpeg-theme" onclick="saveTemplateAsImage('jpeg')">🖼️ JPEG 고화질 저장</button>
+                <button class="save-btn png-theme" style="margin-top: 10px;" onclick="saveTemplateAsImage('png')">🖼️ PNG 고화질 저장 (자동 병합)</button>
+                <button class="save-btn jpeg-theme" onclick="saveTemplateAsImage('jpeg')">🖼️ JPEG 고화질 저장 (자동 병합)</button>
                 
                 <button class="reset-btn" onclick="resetCanvasData()">
                     <svg class="reset-svg" viewBox="0 0 24 24"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
@@ -510,94 +513,135 @@
         let paletteCounts = { "1": 2, "2": 2, "3": 2, "4": 2, "5": 2 };
         let charSettings = {};
 
+        // 🎯 [신규] 빠르고 안전한 웹 데이터베이스(IndexedDB) 모듈
+        const dbHelper = {
+            db: null,
+            async init() {
+                return new Promise((resolve, reject) => {
+                    const req = indexedDB.open('CommissionMakerDB', 1);
+                    req.onupgradeneeded = e => e.target.result.createObjectStore('dataStore');
+                    req.onsuccess = e => { this.db = e.target.result; resolve(); };
+                    req.onerror = e => reject(e);
+                });
+            },
+            async save(key, data) {
+                if(!this.db) await this.init();
+                return new Promise((resolve) => {
+                    const tx = this.db.transaction('dataStore', 'readwrite');
+                    tx.objectStore('dataStore').put(data, key);
+                    tx.oncomplete = resolve;
+                });
+            },
+            async load(key) {
+                if(!this.db) await this.init();
+                return new Promise((resolve) => {
+                    const tx = this.db.transaction('dataStore', 'readonly');
+                    const req = tx.objectStore('dataStore').get(key);
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => resolve(null);
+                });
+            },
+            async clear() {
+                if(!this.db) await this.init();
+                return new Promise((resolve) => {
+                    const tx = this.db.transaction('dataStore', 'readwrite');
+                    tx.objectStore('dataStore').clear();
+                    tx.oncomplete = resolve;
+                });
+            }
+        };
+
+        // 🎯 오토 세이브 딜레이 (과부하 방지)
+        let saveTimeout;
+        function triggerAutoSave() {
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(saveAllDataToDB, 800);
+        }
+
         function initCharSettings() {
             for(let i=1; i<=5; i++) {
                 charSettings[`char_${i}`] = {
-                    tagVisible: true,
-                    bubbleVisible: true,
-                    bubbleIcon: 'mic',
-                    bubbleLine: '1',
-                    tags: [
-                        { text: '키워드 1', color: '#8e959c' },
-                        { text: '키워드 2', color: '#8e959c' },
-                        { text: '키워드 3', color: '#8e959c' }
-                    ]
+                    tagVisible: true, bubbleVisible: true, bubbleIcon: 'mic', bubbleLine: '1',
+                    tags: [{ text: '키워드 1', color: '#8e959c' }, { text: '키워드 2', color: '#8e959c' }, { text: '키워드 3', color: '#8e959c' }]
                 };
             }
         }
 
-        // 🎯 [신규] 사이드바 토글 기능
         function toggleSidebars() {
             const sidebars = document.querySelectorAll('.sidebar-panel');
             const btn = document.getElementById('floating-sidebar-toggle');
             const isHidden = sidebars[0].style.display === 'none';
-            
             sidebars.forEach(sb => sb.style.display = isHidden ? 'flex' : 'none');
             btn.innerHTML = isHidden ? '👁️ 양쪽 메뉴 숨기기 (단축키 M)' : '👁️ 양쪽 메뉴 보이기 (단축키 M)';
-            
-            // 토글 후 화면 스케일 재계산
             setTimeout(autoResponsiveScale, 100);
         }
 
-        // 🎯 [신규] 단축키 'M' 적용
         document.addEventListener('keydown', (e) => {
-            // 입력창에서 타이핑 중일 때는 단축키 무시
             if (e.key.toLowerCase() === 'm' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
                 toggleSidebars();
             }
         });
 
-        function changeMemberCount(val) {
-            const count = parseInt(val);
+        // 🎯 [핵심] 개별 집중 편집 모드 + 인원수 동적 변경 통합 로직
+        function updateColumnVisibility() {
+            const count = parseInt(document.querySelector('input[name="member-count-choice"]:checked').value);
+            const isFocusMode = document.getElementById('focus-mode-toggle').checked;
             const canvas = document.getElementById('main-canvas');
-            
-            if (count === 2) canvas.style.width = '920px'; 
-            else if (count === 3) canvas.style.width = '1360px';
-            else if (count === 4) canvas.style.width = '1800px';
-            else canvas.style.width = '2240px';
 
-            for(let i=1; i<=5; i++) {
-                const col = document.getElementById(`char-col-${i}`);
-                const btn = document.getElementById(`lbl-char-${i}`);
-                if(i <= count) {
-                    col.style.display = 'flex';
-                    btn.style.display = 'block';
-                } else {
-                    col.style.display = 'none';
-                    btn.style.display = 'none';
+            if (isFocusMode) {
+                canvas.style.width = '420px'; // 1인 집중 화면 사이즈
+                for(let i=1; i<=5; i++) {
+                    const col = document.getElementById(`char-col-${i}`);
+                    const btn = document.getElementById(`lbl-char-${i}`);
+                    
+                    if (i <= count) btn.style.display = 'block'; else btn.style.display = 'none'; // 상단 탭은 유지
+                    
+                    if (i == currentTargetChar && i <= count) {
+                        col.style.display = 'flex';
+                        col.style.borderRight = 'none'; // 한명이니 테두리 제거
+                    } else {
+                        col.style.display = 'none';
+                    }
+                }
+            } else {
+                // 전체 화면 모드 (기존)
+                if (count === 2) canvas.style.width = '920px'; 
+                else if (count === 3) canvas.style.width = '1360px';
+                else if (count === 4) canvas.style.width = '1800px';
+                else canvas.style.width = '2240px';
+
+                for(let i=1; i<=5; i++) {
+                    const col = document.getElementById(`char-col-${i}`);
+                    const btn = document.getElementById(`lbl-char-${i}`);
+                    if(i <= count) {
+                        col.style.display = 'flex';
+                        btn.style.display = 'block';
+                        col.style.borderRight = (i == count) ? 'none' : '1px dashed var(--border-color)';
+                    } else {
+                        col.style.display = 'none';
+                        btn.style.display = 'none';
+                    }
                 }
             }
-
-            document.getElementById('char-btn-grid').style.gridTemplateColumns = `repeat(${count}, 1fr)`;
-            document.querySelectorAll('.character-column').forEach(c => c.style.borderRight = '1px dashed var(--border-color)');
-            document.getElementById(`char-col-${count}`).style.borderRight = 'none';
             
+            document.getElementById('char-btn-grid').style.gridTemplateColumns = `repeat(${count}, 1fr)`;
             if (parseInt(currentTargetChar) > count) handleColClick('1');
 
-            saveToLocalStorage();
+            triggerAutoSave();
             setTimeout(autoResponsiveScale, 100); 
         }
 
-        // 🎯 [수정] 줌 제어 토글 연동 반응형 엔진
+        // 반응형 스케일 오토 매칭 엔진
         function autoResponsiveScale() {
             const canvas = document.getElementById('main-canvas');
             const container = document.querySelector('.workspace-container');
-            const isAutoScaleOn = document.getElementById('auto-scale-toggle').checked; // 토글 상태 확인
-            const sidebarsHidden = document.querySelectorAll('.sidebar-panel')[0].style.display === 'none'; // 패널 가려짐 상태 확인
+            const sidebarsHidden = document.querySelectorAll('.sidebar-panel')[0].style.display === 'none'; 
             
             if(!canvas || !container) return;
             
-            // 💡 자동 맞춤이 꺼져있으면 무조건 원본 크기(scale 1) 유지
-            if (!isAutoScaleOn) {
-                canvas.style.transform = 'none';
-                canvas.style.marginRight = '0px';
-                return;
-            }
-            
-            // 메뉴 패널이 숨겨져 있으면 여유 공간(paddingGapWidth)을 줄여서 캔버스를 더 크게 보여줌
-            const paddingGapWidth = sidebarsHidden ? 60 : 500; 
+            const paddingGapWidth = sidebarsHidden ? 60 : 540; 
             const availableWidth = window.innerWidth - paddingGapWidth;
-            const currentCanvasWidth = parseInt(canvas.style.width) || 2240; 
+            const currentCanvasWidth = parseInt(canvas.style.width); 
             
             if (availableWidth < currentCanvasWidth && availableWidth > 300) {
                 const scaleFactor = availableWidth / currentCanvasWidth;
@@ -608,7 +652,6 @@
                 canvas.style.transform = 'none';
                 canvas.style.marginRight = '0px';
             }
-            saveToLocalStorage(); // 스케일 토글 상태를 저장하기 위해 추가
         }
 
         function changeCanvasHeight(val) {
@@ -616,7 +659,7 @@
             document.getElementById('height-val').innerText = val + 'px';
             const baseHeight = 1000;
             document.getElementById('main-canvas').style.height = (baseHeight + parseInt(val)) + 'px';
-            saveToLocalStorage();
+            triggerAutoSave();
         }
 
         function handleColClick(charNum) {
@@ -646,9 +689,12 @@
                 document.getElementById(`sidebar-input-text-${idx+1}`).value = tag.text;
                 document.getElementById(`sidebar-picker-${idx+1}`).value = tag.color;
             });
+
+            updateColumnVisibility(); // 탭 이동 시 화면 갱신
         }
 
-        function saveToLocalStorage() {
+        // 🎯 DB 영구 저장 로직 (이미지, 스티커 포함)
+        async function saveAllDataToDB() {
             const data = { charSettings: charSettings };
             for(let i=1; i<=5; i++) {
                 const specInputs = document.querySelectorAll(`#c${i}-spec-container .input-spec-field`);
@@ -662,13 +708,26 @@
                     if (inputColor) savedPalettes.push({ id: inputColor.id, color: inputColor.value, isPermanent: isPermanent });
                 });
 
+                // 이미지 저장 추출
+                let savedImage = null;
+                const imgNode = document.querySelector(`#c${i}-bust-upload-zone img`);
+                if(imgNode) savedImage = { src: imgNode.src, posX: imgNode.dataset.posX, posY: imgNode.dataset.posY, scale: imgNode.dataset.scale };
+
+                // 스티커 저장 추출 (개별 열 기준)
+                const savedStickers = [];
+                document.querySelectorAll(`#char-col-${i} .draggable-sticker`).forEach(st => {
+                    savedStickers.push({ src: st.querySelector('img').src, left: st.style.left, top: st.style.top, width: st.style.width, angle: st.dataset.angle });
+                });
+
                 data[`char_${i}`] = {
                     speech: document.getElementById(`c${i}-input-speech`).value,
                     name: document.getElementById(`c${i}-input-name`).value,
                     hanja: document.getElementById(`c${i}-input-hanja`).value,
                     descriptions: Array.from(document.querySelectorAll(`#c${i}-desc-container input`)).map(input => input.value),
                     specs: specValues,
-                    palettes: savedPalettes
+                    palettes: savedPalettes,
+                    image: savedImage,
+                    stickers: savedStickers
                 };
             }
             data.global = {
@@ -676,24 +735,31 @@
                 fontSize: document.getElementById('font-slider').value,
                 canvasExt: document.getElementById('height-slider').value,
                 memberCount: document.querySelector('input[name="member-count-choice"]:checked')?.value || '5',
-                autoScale: document.getElementById('auto-scale-toggle').checked // 줌 상태 저장
+                focusMode: document.getElementById('focus-mode-toggle').checked
             };
-            localStorage.setItem('trpg_multi_halfbody_v5_data', JSON.stringify(data));
+            
+            await dbHelper.save('commission_v6_data', data);
+            
+            // 토스트 알림 표시
+            const toast = document.getElementById('toast-notification');
+            toast.style.opacity = '1';
+            setTimeout(() => { toast.style.opacity = '0'; }, 2000);
         }
 
-        function loadFromLocalStorage() {
+        async function loadDataFromDB() {
             initCharSettings();
-            const savedDataString = localStorage.getItem('trpg_multi_halfbody_v5_data');
+            const data = await dbHelper.load('commission_v6_data');
             
             for(let i=1; i<=5; i++) {
                 document.getElementById(`c${i}-desc-container`).innerHTML = '';
                 document.getElementById(`c${i}-spec-container`).innerHTML = '';
                 document.getElementById(`c${i}-palette-row`).innerHTML = '';
+                // 기존 스티커 초기화
+                document.querySelectorAll(`#char-col-${i} .draggable-sticker`).forEach(el => el.remove());
             }
 
-            if (savedDataString) {
+            if (data) {
                 try {
-                    const data = JSON.parse(savedDataString);
                     if(data.charSettings) charSettings = data.charSettings;
 
                     if(data.global) {
@@ -710,14 +776,10 @@
                         if(g.memberCount) {
                             const countRadio = document.querySelector(`input[name="member-count-choice"][value="${g.memberCount}"]`);
                             if(countRadio) countRadio.checked = true;
-                            changeMemberCount(g.memberCount);
-                        } else {
-                            changeMemberCount('5');
                         }
 
-                        // 스케일 설정 불러오기
-                        if(g.autoScale !== undefined) {
-                            document.getElementById('auto-scale-toggle').checked = g.autoScale;
+                        if(g.focusMode !== undefined) {
+                            document.getElementById('focus-mode-toggle').checked = g.focusMode;
                         }
                     }
 
@@ -740,6 +802,36 @@
                                 cData.palettes.forEach(p => rebuildPaletteItem(i, p.id, p.color, p.isPermanent));
                                 paletteCounts[i] = cData.palettes.length;
                             } else { provideDefaultPalettes(i); }
+
+                            // 🎯 이미지 데이터 복구
+                            if (cData.image && cData.image.src) {
+                                const zone = document.getElementById(`c${i}-bust-upload-zone`);
+                                let img = document.createElement('img');
+                                zone.appendChild(img);
+                                img.src = cData.image.src;
+                                img.dataset.posX = cData.image.posX || 0;
+                                img.dataset.posY = cData.image.posY || 0;
+                                img.dataset.scale = cData.image.scale || 1.0;
+                                img.style.transform = `translate(${img.dataset.posX}px, ${img.dataset.posY}px) scale(${img.dataset.scale})`;
+                                zone.querySelector('.placeholder-text').style.display = 'none';
+                                makeImageInteractive(img, zone);
+                            }
+
+                            // 🎯 스티커 데이터 복구
+                            if (cData.stickers && cData.stickers.length > 0) {
+                                cData.stickers.forEach(stData => {
+                                    const sticker = document.createElement('div');
+                                    sticker.className = 'draggable-sticker';
+                                    sticker.style.left = stData.left;
+                                    sticker.style.top = stData.top;
+                                    sticker.style.width = stData.width;
+                                    sticker.dataset.angle = stData.angle || 0;
+                                    sticker.style.transform = `rotate(${stData.angle || 0}deg)`;
+                                    sticker.innerHTML = `<img src="${stData.src}"><button class="delete-sticker-btn" onclick="this.parentElement.remove(); triggerAutoSave();">×</button><div class="rotate-sticker-handle" title="회전">🔄</div><div class="resize-sticker-handle" title="크기"></div>`;
+                                    document.getElementById(`char-col-${i}`).appendChild(sticker);
+                                    bindStickerEvents(sticker);
+                                });
+                            }
                         } else {
                             provideDefaultRows(i);
                             buildInitialSpecsLayout(i);
@@ -747,12 +839,12 @@
                         }
                         applyConfigToDOM(i);
                     }
-                } catch(e) { fallbackDefaults(); changeMemberCount('5'); }
-            } else { fallbackDefaults(); changeMemberCount('5'); }
+                } catch(e) { console.error(e); fallbackDefaults(); }
+            } else { fallbackDefaults(); }
             
+            updateColumnVisibility();
             switchTargetCharacter("1");
             setupAutoSaveListeners();
-            setTimeout(autoResponsiveScale, 100);
         }
 
         function fallbackDefaults() {
@@ -794,12 +886,12 @@
 
         function changeMainFontFamily(fontType) {
             document.documentElement.style.setProperty('--main-font', fontType === 'serif' ? "'BonmyeongjoSourceHanSerif', 'Noto Serif KR', serif" : "'Noto Sans KR', sans-serif");
+            triggerAutoSave();
         }
 
         function toggleSingleVisibility(type, isChecked) {
             const cfg = charSettings[`char_${currentTargetChar}`];
             if(!cfg) return;
-
             if(type === 'tag-list') {
                 cfg.tagVisible = isChecked;
                 document.getElementById(`c${currentTargetChar}-tag-list-layer`).style.opacity = isChecked ? "1" : "0";
@@ -807,14 +899,14 @@
                 cfg.bubbleVisible = isChecked;
                 document.getElementById(`c${currentTargetChar}-speech-bubble-layer`).style.opacity = isChecked ? "1" : "0";
             }
-            saveToLocalStorage();
+            triggerAutoSave();
         }
 
         function changeSpeechLineAlignment(val) {
             const cfg = charSettings[`char_${currentTargetChar}`];
             if(cfg) cfg.bubbleLine = val;
             changeSpeechLineOfChar(currentTargetChar, val);
-            saveToLocalStorage();
+            triggerAutoSave();
         }
 
         function changeSpeechLineOfChar(charNum, val) {
@@ -826,7 +918,7 @@
             const cfg = charSettings[`char_${currentTargetChar}`];
             if(cfg) cfg.bubbleIcon = val;
             changeSpeechIconOfChar(currentTargetChar, val);
-            saveToLocalStorage();
+            triggerAutoSave();
         }
 
         function changeSpeechIconOfChar(charNum, val) {
@@ -841,7 +933,7 @@
             if(cfg && cfg.tags[index-1]) cfg.tags[index-1].text = text;
             const item = document.getElementById(`c${currentTargetChar}-tag-item-${index}`);
             if(item) item.innerText = text;
-            saveToLocalStorage();
+            triggerAutoSave();
         }
 
         function syncTagColor(index, colorHex) {
@@ -853,7 +945,7 @@
             const g = parseInt(colorHex.slice(3, 5), 16);
             const b = parseInt(colorHex.slice(5, 7), 16);
             target.style.background = `linear-gradient(90deg, ${colorHex}, rgba(${r}, ${g}, ${b}, 0))`;
-            saveToLocalStorage();
+            triggerAutoSave();
         }
 
         function applyBulkTagColor() {
@@ -872,8 +964,8 @@
             const specContainer = document.getElementById(`c${charNum}-spec-container`);
             const boxDiv = document.createElement('div');
             boxDiv.className = 'spec-box-item';
-            boxDiv.innerHTML = `<button class="spec-box-del-btn" onclick="event.stopPropagation(); this.parentElement.remove(); saveToLocalStorage();">×</button><input type="text" class="input-spec-field" value="${textVal}" maxlength="10">`;
-            boxDiv.querySelector('input').addEventListener('input', saveToLocalStorage);
+            boxDiv.innerHTML = `<button class="spec-box-del-btn" onclick="event.stopPropagation(); this.parentElement.remove(); triggerAutoSave();">×</button><input type="text" class="input-spec-field" value="${textVal}" maxlength="10">`;
+            boxDiv.querySelector('input').addEventListener('input', triggerAutoSave);
             specContainer.appendChild(boxDiv);
         }
 
@@ -881,7 +973,7 @@
             const totalSlots = document.querySelectorAll(`#c${currentTargetChar}-spec-container .spec-box-item`).length;
             if (totalSlots >= 6) { alert('프로필 박스는 캐릭터당 최대 6개까지만 배치 가능합니다.'); return; }
             createSpecBoxNode(currentTargetChar, '입력');
-            saveToLocalStorage();
+            triggerAutoSave();
         }
 
         function provideDefaultRows(charNum) {
@@ -893,10 +985,10 @@
         function addDescRow(charNum, textValue = '상세 외관 포인트 기입') {
             const container = document.getElementById(`c${charNum}-desc-container`);
             const newLi = document.createElement('li');
-            newLi.innerHTML = `<input type="text" value="${textValue}"><button class="row-del-btn" onclick="this.parentElement.remove(); saveToLocalStorage();">×</button>`;
+            newLi.innerHTML = `<input type="text" value="${textValue}"><button class="row-del-btn" onclick="this.parentElement.remove(); triggerAutoSave();">×</button>`;
             container.appendChild(newLi);
-            newLi.querySelector('input').addEventListener('input', saveToLocalStorage);
-            saveToLocalStorage();
+            newLi.querySelector('input').addEventListener('input', triggerAutoSave);
+            triggerAutoSave();
         }
 
         function triggerFileInput(element) { element.querySelector('input[type="file"]').click(); }
@@ -909,20 +1001,18 @@
                 fileReader.onload = function(e) {
                     const zone = inputElement.parentElement;
                     let imageTag = zone.querySelector('img');
-                    
                     if (!imageTag) {
                         imageTag = document.createElement('img');
                         zone.appendChild(imageTag);
-                        imageTag.dataset.posX = 0; imageTag.dataset.posY = 0; imageTag.dataset.scale = 1.0;
                         makeImageInteractive(imageTag, zone);
                     }
-                    
                     imageTag.src = e.target.result;
                     imageTag.style.transform = "translate(0px, 0px) scale(1)";
                     imageTag.dataset.posX = 0; imageTag.dataset.posY = 0; imageTag.dataset.scale = 1.0;
 
                     const textPlaceholder = zone.querySelector('.placeholder-text');
                     if (textPlaceholder) textPlaceholder.style.display = 'none';
+                    triggerAutoSave();
                 }
                 fileReader.readAsDataURL(selectedFile);
             }
@@ -944,13 +1034,14 @@
                 img.dataset.posX = currentX; img.dataset.posY = currentY;
                 img.style.transform = `translate(${currentX}px, ${currentY}px) scale(${img.dataset.scale})`;
             });
-            document.addEventListener('mouseup', () => { activeMove = false; });
+            document.addEventListener('mouseup', () => { if(activeMove){ activeMove = false; triggerAutoSave(); } });
             zone.addEventListener('wheel', (e) => {
                 e.preventDefault();
                 let currentScale = parseFloat(img.dataset.scale);
                 currentScale = (e.deltaY < 0) ? currentScale + 0.05 : Math.max(0.1, currentScale - 0.05);
                 img.dataset.scale = currentScale;
                 img.style.transform = `translate(${img.dataset.posX}px, ${img.dataset.posY}px) scale(${currentScale})`;
+                triggerAutoSave();
             });
         }
 
@@ -973,12 +1064,13 @@
 
         function changeMicColor(picker, charNum) {
             picker.closest('.top-speech-bubble').style.setProperty('--mic-color', picker.value);
+            triggerAutoSave();
         }
 
         function addNewPaletteItem() {
             paletteCounts[currentTargetChar]++;
             rebuildPaletteItem(currentTargetChar, `c${currentTargetChar}-color-${paletteCounts[currentTargetChar]}`, '#cccccc');
-            saveToLocalStorage();
+            triggerAutoSave();
         }
 
         function rebuildPaletteItem(charNum, id, colorHex, isPermanent = false) {
@@ -986,7 +1078,7 @@
             newItem.className = 'color-item';
             if (isPermanent) newItem.dataset.permanent = 'true';
             
-            const delBtn = isPermanent ? '' : `<button class="palette-del-btn" onclick="this.parentElement.remove(); saveToLocalStorage();">×</button>`;
+            const delBtn = isPermanent ? '' : `<button class="palette-del-btn" onclick="this.parentElement.remove(); triggerAutoSave();">×</button>`;
 
             newItem.innerHTML = `
                 ${delBtn}
@@ -994,9 +1086,10 @@
                 <input type="text" id="${id}" class="color-code-input" value="${colorHex.toUpperCase()}" onchange="updateColorFromText(this)">
             `;
             document.getElementById(`c${charNum}-palette-row`).appendChild(newItem);
-            newItem.querySelectorAll('input').forEach(input => input.addEventListener('input', saveToLocalStorage));
+            newItem.querySelectorAll('input').forEach(input => input.addEventListener('input', triggerAutoSave));
         }
 
+        // 🎯 스티커 소속화 및 드래그 로직 
         function createNewSticker(event) {
             const selectedFile = event.target.files[0];
             if (selectedFile) {
@@ -1004,49 +1097,72 @@
                 fileReader.onload = function(e) {
                     const sticker = document.createElement('div');
                     sticker.className = 'draggable-sticker';
-                    sticker.style.left = '100px'; sticker.style.top = '250px'; sticker.style.width = '180px';
+                    sticker.style.left = '50px'; sticker.style.top = '250px'; sticker.style.width = '180px';
                     sticker.dataset.angle = 0; 
-                    sticker.innerHTML = `<img src="${e.target.result}"><button class="delete-sticker-btn" onclick="this.parentElement.remove()">×</button><div class="rotate-sticker-handle" title="회전">🔄</div><div class="resize-sticker-handle" title="크기"></div>`;
-                    document.getElementById('main-canvas').appendChild(sticker);
+                    sticker.innerHTML = `<img src="${e.target.result}"><button class="delete-sticker-btn" onclick="this.parentElement.remove(); triggerAutoSave();">×</button><div class="rotate-sticker-handle" title="회전">🔄</div><div class="resize-sticker-handle" title="크기"></div>`;
                     
-                    let isDragging = false, isResizing = false, isRotating = false, diffX = 0, diffY = 0, startWidth = 0, startMouseX = 0, centerPointX = 0, centerPointY = 0;
-                    sticker.addEventListener('mousedown', function(dragEvent) {
-                        if (['delete-sticker-btn', 'resize-sticker-handle', 'rotate-sticker-handle'].includes(dragEvent.target.className)) return;
-                        isDragging = true; diffX = dragEvent.clientX - sticker.offsetLeft; diffY = dragEvent.clientY - sticker.offsetTop;
-                        dragEvent.preventDefault();
-                    });
-                    sticker.querySelector('.resize-sticker-handle').addEventListener('mousedown', function(resizeEvent) { isResizing = true; startWidth = sticker.clientWidth; startMouseX = resizeEvent.clientX; resizeEvent.preventDefault(); resizeEvent.stopPropagation(); });
-                    sticker.querySelector('.rotate-sticker-handle').addEventListener('mousedown', function(rotateEvent) { isRotating = true; const rect = sticker.getBoundingClientRect(); centerPointX = rect.left + rect.width / 2; centerPointY = rect.top + rect.height / 2; rotateEvent.preventDefault(); rotateEvent.stopPropagation(); });
-                    document.addEventListener('mousemove', function(moveEvent) {
-                        if (isDragging) { sticker.style.left = `${moveEvent.clientX - diffX}px`; sticker.style.top = `${moveEvent.clientY - diffY}px`; }
-                        if (isResizing) { sticker.style.width = `${Math.max(30, startWidth + (moveEvent.clientX - startMouseX))}px`; }
-                        if (isRotating) { let angleDegrees = Math.atan2(moveEvent.clientY - centerPointY, moveEvent.clientX - centerPointX) * (180 / Math.PI) + 45; sticker.dataset.angle = angleDegrees; sticker.style.transform = `rotate(${angleDegrees}deg)`; }
-                    });
-                    document.addEventListener('mouseup', function() { isDragging = isResizing = isRotating = false; });
+                    // 현재 선택된 캐릭터 열 내부에 스티커 삽입
+                    document.getElementById(`char-col-${currentTargetChar}`).appendChild(sticker);
+                    bindStickerEvents(sticker);
+                    triggerAutoSave();
                 };
                 fileReader.readAsDataURL(selectedFile);
             }
         }
 
+        function bindStickerEvents(sticker) {
+            let isDragging = false, isResizing = false, isRotating = false, diffX = 0, diffY = 0, startWidth = 0, startMouseX = 0, centerPointX = 0, centerPointY = 0;
+            sticker.addEventListener('mousedown', function(dragEvent) {
+                if (['delete-sticker-btn', 'resize-sticker-handle', 'rotate-sticker-handle'].includes(dragEvent.target.className)) return;
+                isDragging = true; diffX = dragEvent.clientX - sticker.offsetLeft; diffY = dragEvent.clientY - sticker.offsetTop;
+                dragEvent.preventDefault();
+            });
+            sticker.querySelector('.resize-sticker-handle').addEventListener('mousedown', function(resizeEvent) { isResizing = true; startWidth = sticker.clientWidth; startMouseX = resizeEvent.clientX; resizeEvent.preventDefault(); resizeEvent.stopPropagation(); });
+            sticker.querySelector('.rotate-sticker-handle').addEventListener('mousedown', function(rotateEvent) { isRotating = true; const rect = sticker.getBoundingClientRect(); centerPointX = rect.left + rect.width / 2; centerPointY = rect.top + rect.height / 2; rotateEvent.preventDefault(); rotateEvent.stopPropagation(); });
+            
+            document.addEventListener('mousemove', function(moveEvent) {
+                if (isDragging) { sticker.style.left = `${moveEvent.clientX - diffX}px`; sticker.style.top = `${moveEvent.clientY - diffY}px`; }
+                if (isResizing) { sticker.style.width = `${Math.max(30, startWidth + (moveEvent.clientX - startMouseX))}px`; }
+                if (isRotating) { let angleDegrees = Math.atan2(moveEvent.clientY - centerPointY, moveEvent.clientX - centerPointX) * (180 / Math.PI) + 45; sticker.dataset.angle = angleDegrees; sticker.style.transform = `rotate(${angleDegrees}deg)`; }
+            });
+            document.addEventListener('mouseup', function() { 
+                if (isDragging || isResizing || isRotating) { isDragging = isResizing = isRotating = false; triggerAutoSave(); }
+            });
+        }
+
         function setupAutoSaveListeners() {
             document.querySelectorAll('input[type="text"], textarea, input[type="range"], input[type="color"], input[type="radio"], input[type="checkbox"]').forEach(element => {
-                element.addEventListener('input', saveToLocalStorage); element.addEventListener('change', saveToLocalStorage);
+                element.addEventListener('input', triggerAutoSave); 
+                element.addEventListener('change', triggerAutoSave);
             });
         }
 
         function changeDescFontSize(val) {
             document.getElementById('font-slider').value = val; document.getElementById('font-val').innerText = val + 'px';
             document.documentElement.style.setProperty('--desc-font-size', val + 'px');
+            triggerAutoSave();
         }
 
-        function resetCanvasData() {
-            if(confirm("모든 프로필 정보와 세팅이 초기화됩니다. 진행할까요?")) {
-                localStorage.removeItem('trpg_multi_halfbody_v5_data'); window.location.reload();
+        async function resetCanvasData() {
+            if(confirm("이미지와 세팅을 포함한 모든 정보가 초기화됩니다. 진행할까요?")) {
+                await dbHelper.clear();
+                window.location.reload();
             }
         }
 
-        function saveTemplateAsImage(format = 'png') {
+        // 🎯 이미지 병합 저장
+        async function saveTemplateAsImage(format = 'png') {
             const canvasElement = document.getElementById('main-canvas');
+            const focusToggle = document.getElementById('focus-mode-toggle');
+            const wasFocusMode = focusToggle.checked;
+
+            // 저장 시 강제로 다인원 병합 렌더링 활성화
+            if (wasFocusMode) {
+                focusToggle.checked = false;
+                updateColumnVisibility();
+                await new Promise(r => setTimeout(r, 200)); // DOM 레이아웃 병합 적용 대기
+            }
+
             const originalTransform = canvasElement.style.transform;
             const originalMargin = canvasElement.style.marginRight;
             canvasElement.style.transform = 'none'; canvasElement.style.marginRight = '0px';
@@ -1100,10 +1216,9 @@
                 }
             }
 
-            // 숨겨진 사이드바 임시 복구 (에러 방지용)
             const sidebars = document.querySelectorAll('.sidebar-panel');
-            const wasHidden = sidebars[0].style.display === 'none';
-            if (wasHidden) sidebars.forEach(sb => sb.style.display = 'flex');
+            const sidebarsWasHidden = sidebars[0].style.display === 'none';
+            if (sidebarsWasHidden) sidebars.forEach(sb => sb.style.display = 'flex'); // 에러 방지용 임시 표출
 
             canvasElement.classList.add('hide-on-save');
 
@@ -1119,26 +1234,30 @@
                     const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png';
                     const downloadLink = document.createElement('a');
                     const memberCnt = document.querySelector('input[name="member-count-choice"]:checked').value;
-                    downloadLink.download = `${memberCnt}인_반신_가변커미션틀.${format === 'jpeg' ? 'jpg' : 'png'}`;
+                    downloadLink.download = `${memberCnt}인_반신_자동병합완료.${format === 'jpeg' ? 'jpg' : 'png'}`;
                     downloadLink.href = canvas.toDataURL(mimeType, 0.95); downloadLink.click();
 
                     canvasElement.classList.remove('hide-on-save');
                     savedTransfers.forEach(item => { item.temporarySpan.remove(); item.originalInput.style.display = ''; });
                     textareasTransfers.forEach(item => { item.temporarySpan.remove(); item.originalInput.style.display = ''; });
                     canvasElement.style.transform = originalTransform; canvasElement.style.marginRight = originalMargin;
-                    if (wasHidden) sidebars.forEach(sb => sb.style.display = 'none');
+                    
+                    if (sidebarsWasHidden) sidebars.forEach(sb => sb.style.display = 'none');
+                    if (wasFocusMode) { focusToggle.checked = true; updateColumnVisibility(); } // 기존 모드 복구
                 }).catch(err => {
                     canvasElement.classList.remove('hide-on-save');
                     savedTransfers.forEach(item => { item.temporarySpan.remove(); item.originalInput.style.display = ''; });
                     textareasTransfers.forEach(item => { item.temporarySpan.remove(); item.originalInput.style.display = ''; });
                     canvasElement.style.transform = originalTransform; canvasElement.style.marginRight = originalMargin;
-                    if (wasHidden) sidebars.forEach(sb => sb.style.display = 'none');
+                    
+                    if (sidebarsWasHidden) sidebars.forEach(sb => sb.style.display = 'none');
+                    if (wasFocusMode) { focusToggle.checked = true; updateColumnVisibility(); }
                 });
             }, 100); 
         }
 
         window.addEventListener('resize', autoResponsiveScale);
-        window.addEventListener('DOMContentLoaded', loadFromLocalStorage);
+        window.addEventListener('DOMContentLoaded', loadDataFromDB);
     </script>
 </body>
 </html>
