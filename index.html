@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>다인원 반신 커미션 폼 (HUD 가이드 업데이트)</title>
+    <title>다인원 반신 커미션 폼</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
@@ -156,26 +156,64 @@
         .resize-sticker-handle { position: absolute; bottom: -4px; right: -4px; width: 12px; height: 12px; background: var(--primary-color); cursor: se-resize; display: none; border-radius: 2px; z-index: 11; }
         .rotate-sticker-handle { position: absolute; top: -6px; right: -6px; width: 16px; height: 16px; background: #222222; color: #ffffff; cursor: alias; display: none; border-radius: 50%; z-index: 11; align-items: center; justify-content: center; padding: 2px; }
         .draggable-sticker:hover .delete-sticker-btn, .draggable-sticker:hover .resize-sticker-handle, .draggable-sticker:hover .rotate-sticker-handle { display: flex; }
+        .draggable-sticker.selected { outline: 2px solid #38bdf8 !important; outline-offset: 1px; }
+
+        /* 자석 스냅 가이드선 */
+        .snap-guide-line { position: absolute; background: #ec4899; pointer-events: none; z-index: 500; display: none; box-shadow: 0 0 6px rgba(236,72,153,0.7); }
+        .snap-guide-line.visible { display: block; }
+        .snap-guide-v { width: 1px; top: 0; bottom: 0; }
+        .snap-guide-h { height: 1px; left: 0; right: 0; }
+
+        /* 스티커 정렬 플로팅 툴바 */
+        #sticker-align-toolbar { position: fixed; display: none; align-items: center; gap: 2px; background: #0f172a; padding: 6px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.35); z-index: 100050; }
+        .align-btn { width: 30px; height: 30px; border-radius: 6px; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #cbd5e1; transition: background 0.15s, color 0.15s; }
+        .align-btn .ui-icon { width: 15px; height: 15px; }
+        .align-btn:hover { background: #1e293b; color: #ffffff; }
+        .align-btn-divider { width: 1px; height: 18px; background: rgba(255,255,255,0.15); margin: 0 3px; flex-shrink: 0; }
+
+        /* 자석 스냅 ON/OFF 토글 행 */
+        .snap-toggle-row { display: flex; align-items: center; justify-content: space-between; background: #fdf4ff; border: 1px solid #f5d0fe; padding: 10px 12px; border-radius: 10px; font-size: 11px; font-weight: 700; color: #86198f; }
+        .snap-toggle-row .sidebar-title-left { color: #86198f; }
         
         /* 💡 HUD 가이드 오버레이 스타일 */
-        .canvas-overlay-guide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(4px); z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; user-select: none; cursor: pointer; border-radius: 20px; }
+        /* 💡 전체 화면 고정형 HUD 가이드: 캔버스 축소 배율과 무관하게 항상 실제 크기로 표시됩니다 */
+        .canvas-overlay-guide { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(4px); z-index: 99998; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; user-select: none; cursor: pointer; }
         .canvas-overlay-guide.active { opacity: 1; pointer-events: auto; }
-        .hud-highlight { position: absolute; border: 2px dashed #38bdf8; background: rgba(56, 189, 248, 0.05); border-radius: 12px; pointer-events: none; box-shadow: 0 0 15px rgba(56, 189, 248, 0.15); }
-        .hud-arrow-right { position: absolute; height: 2px; background: #38bdf8; pointer-events: none; box-shadow: 0 0 8px #38bdf8; }
-        .hud-arrow-right::after { content: ''; position: absolute; right: -2px; top: -4px; border-width: 5px 0 5px 6px; border-style: solid; border-color: transparent transparent transparent #38bdf8; }
-        .overlay-label { position: absolute; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(56, 189, 248, 0.4); padding: 16px; border-radius: 14px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6); z-index: 10000; }
-        .overlay-label strong { display: block; color: #ffffff; font-size: 14px; font-weight: 800; letter-spacing: 0.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.15); padding-bottom: 6px; margin-bottom: 10px; }
+        .hud-highlight { position: fixed; border: 2px dashed #38bdf8; background: rgba(56, 189, 248, 0.06); border-radius: 12px; pointer-events: none; box-shadow: 0 0 18px rgba(56, 189, 248, 0.18); transition: left 0.15s ease, top 0.15s ease, width 0.15s ease, height 0.15s ease; }
+        .hud-arrow-line { position: fixed; height: 2px; background: #38bdf8; pointer-events: none; box-shadow: 0 0 8px #38bdf8; }
+        .hud-arrow-line::after { content: ''; position: absolute; right: -2px; top: -4px; border-width: 5px 0 5px 6px; border-style: solid; border-color: transparent transparent transparent #38bdf8; }
+        .overlay-label { position: fixed; background: rgba(15, 23, 42, 0.97); border: 1px solid rgba(56, 189, 248, 0.4); padding: 16px 18px; border-radius: 14px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6); z-index: 100000; width: 320px; cursor: default; }
+        .overlay-label strong { display: block; color: #ffffff; font-size: 15px; font-weight: 800; letter-spacing: 0.3px; border-bottom: 1px solid rgba(255, 255, 255, 0.15); padding-bottom: 8px; margin-bottom: 10px; }
         .overlay-label ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
-        .overlay-label li { position: relative; padding-left: 12px; color: #cbd5e1; font-size: 12px; line-height: 1.5; letter-spacing: -0.2px; font-weight: 500; }
-        .overlay-label li::before { content: "•"; position: absolute; left: 0; top: -1px; color: #38bdf8; font-size: 14px; }
+        .overlay-label li { position: relative; padding-left: 14px; color: #e2e8f0; font-size: 13px; line-height: 1.55; letter-spacing: -0.1px; font-weight: 500; }
+        .overlay-label li::before { content: "•"; position: absolute; left: 0; top: -1px; color: #38bdf8; font-size: 15px; }
         .overlay-label li b { color: #ffffff; font-weight: 700; }
-        .lbl-system-status { bottom: 40px; right: 40px; left: auto; transform: none; width: 330px; background: #10b981; border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3); text-align: right; }
-        .lbl-system-status strong { border: none; color: #ffffff; font-size: 13px; padding-bottom: 2px; margin-bottom: 2px; }
-        .lbl-system-status span { display: block; color: #ecfdf5; font-size: 11.5px; line-height: 1.5; }
-        .overlay-close-hint { position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); font-size: 11px; color: rgba(255, 255, 255, 0.6); background: rgba(0, 0, 0, 0.5); padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.15); font-weight: 700; }
+        .lbl-system-status { bottom: 40px; right: 40px; width: 330px; background: #10b981; border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3); text-align: right; }
+        .lbl-system-status strong { border: none; color: #ffffff; font-size: 14px; padding-bottom: 2px; margin-bottom: 2px; }
+        .lbl-system-status span { display: block; color: #ecfdf5; font-size: 12.5px; line-height: 1.6; }
+        .overlay-close-hint { position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); font-size: 12px; color: rgba(255, 255, 255, 0.7); background: rgba(0, 0, 0, 0.5); padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.15); font-weight: 700; z-index: 100000; }
+
+        /* 📖 사용설명서 모달 (항상 고정된 읽기 편한 글씨 크기) */
+        .manual-modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(3px); z-index: 200000; display: none; align-items: center; justify-content: center; padding: 30px; }
+        .manual-modal-overlay.active { display: flex; }
+        .manual-modal-box { background: #ffffff; width: 100%; max-width: 720px; max-height: 85vh; border-radius: 20px; box-shadow: 0 30px 60px rgba(0,0,0,0.4); display: flex; flex-direction: column; overflow: hidden; }
+        .manual-modal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid #f1f5f9; flex-shrink: 0; }
+        .manual-modal-header h2 { font-size: 17px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px; }
+        .manual-modal-close-btn { width: 32px; height: 32px; border-radius: 50%; background: #f1f5f9; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 16px; font-weight: 700; transition: background 0.15s; flex-shrink: 0; }
+        .manual-modal-close-btn:hover { background: #e2e8f0; color: #0f172a; }
+        .manual-modal-body { padding: 20px 24px 28px; overflow-y: auto; }
+        .manual-section { margin-bottom: 22px; }
+        .manual-section:last-child { margin-bottom: 0; }
+        .manual-section h3 { font-size: 14px; font-weight: 800; color: #0f172a; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 2px solid #e0f2fe; }
+        .manual-section ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 7px; }
+        .manual-section li { position: relative; padding-left: 14px; font-size: 13.5px; line-height: 1.6; color: #334155; font-weight: 500; }
+        .manual-section li::before { content: "•"; position: absolute; left: 0; top: 0; color: #0ea5e9; font-weight: 900; }
+        .manual-section li b { color: #0f172a; font-weight: 700; }
+        .manual-modal-body::-webkit-scrollbar { width: 6px; }
+        .manual-modal-body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 
         /* 세이브 마스크 타겟링 (캡쳐 시 숨길 항목들) */
-        .hide-on-save .delete-sticker-btn, .hide-on-save .resize-sticker-handle, .hide-on-save .rotate-sticker-handle, .hide-on-save .upload-hint, .hide-on-save .placeholder-text, .hide-on-save .row-del-btn, .hide-on-save .row-add-btn, .hide-on-save .palette-del-btn, .hide-on-save .spec-box-del-btn, .hide-on-save .color-preview input[type="color"], .hide-on-save .drag-handle, .hide-on-save .canvas-overlay-guide { display: none !important; }
+        .hide-on-save .delete-sticker-btn, .hide-on-save .resize-sticker-handle, .hide-on-save .rotate-sticker-handle, .hide-on-save .upload-hint, .hide-on-save .placeholder-text, .hide-on-save .row-del-btn, .hide-on-save .row-add-btn, .hide-on-save .palette-del-btn, .hide-on-save .spec-box-del-btn, .hide-on-save .color-preview input[type="color"], .hide-on-save .drag-handle { display: none !important; }
         .hide-on-save .upload-zone { border: none !important; background: transparent !important; }
         .hide-on-save .draggable-sticker { outline: none !important; }
         .hide-on-save .color-code-input { display: none !important; }
@@ -230,6 +268,13 @@
         <symbol id="icon-grab" viewBox="0 0 24 24"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></symbol>
         <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
         <symbol id="icon-guide" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8h.01"/><path d="M11 12h1v4h1"/></symbol>
+        <symbol id="icon-magnet" viewBox="0 0 24 24"><path d="M18 6a6 6 0 0 0-12 0v6"/><path d="M6 12H2v3a4 4 0 0 0 4 4a4 4 0 0 0 4-4v-3"/><path d="M18 12h4v3a4 4 0 0 1-4 4a4 4 0 0 1-4-4v-3"/></symbol>
+        <symbol id="icon-align-left" viewBox="0 0 24 24"><line x1="4" y1="3" x2="4" y2="21"/><line x1="8" y1="7" x2="18" y2="7"/><line x1="8" y1="12" x2="14" y2="12"/><line x1="8" y1="17" x2="20" y2="17"/></symbol>
+        <symbol id="icon-align-right" viewBox="0 0 24 24"><line x1="20" y1="3" x2="20" y2="21"/><line x1="6" y1="7" x2="16" y2="7"/><line x1="10" y1="12" x2="16" y2="12"/><line x1="4" y1="17" x2="16" y2="17"/></symbol>
+        <symbol id="icon-align-center-h" viewBox="0 0 24 24"><line x1="12" y1="3" x2="12" y2="21"/><line x1="7" y1="7" x2="17" y2="7"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="5" y1="17" x2="19" y2="17"/></symbol>
+        <symbol id="icon-align-top" viewBox="0 0 24 24"><line x1="3" y1="4" x2="21" y2="4"/><line x1="7" y1="8" x2="7" y2="18"/><line x1="12" y1="8" x2="12" y2="14"/><line x1="17" y1="8" x2="17" y2="20"/></symbol>
+        <symbol id="icon-align-bottom" viewBox="0 0 24 24"><line x1="3" y1="20" x2="21" y2="20"/><line x1="7" y1="16" x2="7" y2="6"/><line x1="12" y1="16" x2="12" y2="10"/><line x1="17" y1="16" x2="17" y2="4"/></symbol>
+        <symbol id="icon-align-center-v" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="7" y1="7" x2="7" y2="17"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="17" y1="5" x2="17" y2="19"/></symbol>
     </svg>
 
     <!-- 우클릭 시 나타날 커스텀 Z-Index 메뉴 -->
@@ -247,6 +292,18 @@
         <div class="context-menu-item" onclick="changeStickerZIndex('back')">
             <svg class="ui-icon"><use href="#icon-arrow-down"/></svg> 맨 뒤로 보내기
         </div>
+    </div>
+
+    <!-- 스티커 선택 시 뜨는 정렬 플로팅 툴바 -->
+    <div id="sticker-align-toolbar">
+        <span id="align-toolbar-count" style="display:none; color:#94a3b8; font-size:11px; font-weight:700; padding:0 6px; white-space:nowrap;"></span>
+        <button class="align-btn" title="왼쪽 정렬" onclick="alignSticker('left')"><svg class="ui-icon"><use href="#icon-align-left"/></svg></button>
+        <button class="align-btn" title="가로 중앙 정렬" onclick="alignSticker('center-h')"><svg class="ui-icon"><use href="#icon-align-center-h"/></svg></button>
+        <button class="align-btn" title="오른쪽 정렬" onclick="alignSticker('right')"><svg class="ui-icon"><use href="#icon-align-right"/></svg></button>
+        <div class="align-btn-divider"></div>
+        <button class="align-btn" title="위쪽 정렬" onclick="alignSticker('top')"><svg class="ui-icon"><use href="#icon-align-top"/></svg></button>
+        <button class="align-btn" title="세로 중앙 정렬" onclick="alignSticker('center-v')"><svg class="ui-icon"><use href="#icon-align-center-v"/></svg></button>
+        <button class="align-btn" title="아래쪽 정렬" onclick="alignSticker('bottom')"><svg class="ui-icon"><use href="#icon-align-bottom"/></svg></button>
     </div>
 
     <button class="floating-toggle-btn" id="floating-sidebar-toggle" onclick="toggleSidebars()">
@@ -361,53 +418,6 @@
         <!-- [중앙 영역] 5인 두상 맞춤형 대형 캔버스 -->
         <div class="template-outer" id="main-canvas">
             <div class="credit-tag">@sa_se372</div>
-            
-            <!-- 💡 캔버스 내부 HUD 가이드 오버레이 -->
-            <div class="canvas-overlay-guide" id="canvas-help-overlay" onclick="toggleHelpOverlay()">
-                
-                <!-- 캐릭터 1 구역: 메인 두상 & 스티커 -->
-                <div class="hud-highlight" style="left: 72px; top: 155px; width: 320px; height: 500px;"></div>
-                <div class="hud-arrow-right" style="left: 402px; top: 400px; width: 40px;"></div>
-                <div class="overlay-label" style="left: 452px; top: 350px; width: 300px;">
-                    <strong>이미지 조작 & 스티커 레이어</strong>
-                    <ul>
-                        <li>점선 영역을 <b>더블 클릭</b>하여 이미지를 띄웁니다.</li>
-                        <li><b>마우스 휠</b>: 초정밀 줌인/줌아웃 지원</li>
-                        <li><b>스티커 우클릭</b>: 스티커 앞/뒤 레이어 순서 변경</li>
-                    </ul>
-                </div>
-        
-                <!-- 캐릭터 2 구역: 드래그 리스트 -->
-                <div class="hud-highlight" style="left: 479px; bottom: 30px; width: 394px; height: 180px;"></div>
-                <div class="hud-arrow-right" style="left: 883px; bottom: 120px; width: 40px;"></div>
-                <div class="overlay-label" style="left: 933px; bottom: 80px; width: 300px;">
-                    <strong>상세 설명 드래그 정렬</strong>
-                    <ul>
-                        <li>좌측 <b>점 6개(·) 손잡이</b>를 꾹 누른 채로 위아래로 드래그하면 순서를 간편하게 변경할 수 있습니다.</li>
-                    </ul>
-                </div>
-        
-                <!-- 캐릭터 3 구역: 말풍선 커스텀 -->
-                <div class="hud-highlight" style="left: 923px; top: 60px; width: 394px; height: 58px;"></div>
-                <div class="hud-arrow-right" style="left: 1327px; top: 90px; width: 40px;"></div>
-                <div class="overlay-label" style="left: 1377px; top: 60px; width: 300px;">
-                    <strong>말풍선 커스텀</strong>
-                    <ul>
-                        <li>좌측 패널에서 <b>1줄/2줄 정렬</b>과 <b>아이콘 종류</b>를 바꿀 수 있습니다.</li>
-                        <li>말풍선의 <b>아이콘을 클릭</b>하면 색상이 즉시 변경됩니다.</li>
-                    </ul>
-                </div>
-        
-                <!-- 전역 팁 & 시스템 상태 -->
-                <div class="overlay-label lbl-system-status">
-                    <strong>💾 기기 브라우저 내부 안심 저장</strong>
-                    <span>
-                        새로고침해도 내용이 유지됩니다.<br>
-                        단축키 <b>M</b>을 누르거나 좌측의 <b>'집중 편집 모드'</b>를 켜면 훨씬 넓고 쾌적하게 작업할 수 있습니다.
-                    </span>
-                </div>
-                <div class="overlay-close-hint">화면 아무 곳이나 클릭하면 가이드가 닫힙니다.</div>
-            </div>
 
             <!-- 캐릭터 1 -->
             <div class="character-column active-target" id="char-col-1" onclick="handleColClick('1')">
@@ -591,6 +601,14 @@
             <div class="panel-title"><svg class="ui-icon"><use href="#icon-tool"/></svg> 유틸리티 도구</div>
             
             <div class="btn-group-vertical">
+
+                <div class="snap-toggle-row">
+                    <div class="sidebar-title-left"><svg class="ui-icon"><use href="#icon-magnet"/></svg> 자석 스냅 정렬</div>
+                    <label class="toggle-label">
+                        <input type="checkbox" class="toggle-input" id="snap-toggle" checked onchange="snapEnabled = this.checked;">
+                        <div class="toggle-switch"></div>
+                    </label>
+                </div>
                 
                 <!-- 하단 여백 조절 슬라이더 -->
                 <div class="font-size-control-vertical" style="background: #e0f2fe; border-color: #bae6fd;">
@@ -631,6 +649,10 @@
                 <button class="guide-open-btn" onclick="toggleHelpOverlay()">
                     <svg class="ui-icon" style="stroke: #3b82f6;"><use href="#icon-guide"/></svg> 시작 가이드 다시 보기
                 </button>
+
+                <button class="guide-open-btn" style="background: #eef2ff; color: #4f46e5; border: 1px solid #c7d2fe;" onclick="toggleManual(true)">
+                    <svg class="ui-icon" style="stroke: #4f46e5;"><use href="#icon-clipboard"/></svg> 사용 설명서 보기
+                </button>
                 
                 <button class="reset-btn" onclick="resetCanvasData()">
                     <svg class="ui-icon" style="stroke: #ef4444;"><use href="#icon-rotate"/></svg>
@@ -641,22 +663,291 @@
 
     </div>
 
+    <!-- 💡 전체 화면 고정형 HUD 가이드: 캔버스 스케일과 무관하게 항상 실제 크기로 표시됩니다 -->
+    <div class="canvas-overlay-guide" id="canvas-help-overlay" onclick="handleOverlayBackgroundClick(event)">
+
+        <div class="hud-highlight" id="hud-box-1"></div>
+        <div class="hud-arrow-line" id="hud-arrow-1"></div>
+        <div class="overlay-label" id="hud-label-1">
+            <strong>이미지 조작 & 스티커 레이어</strong>
+            <ul>
+                <li>점선 박스를 <b>더블 클릭</b>하면 반신 이미지를 업로드할 수 있습니다.</li>
+                <li>업로드한 이미지를 <b>드래그</b>로 옮기고, <b>마우스 휠</b>로 정밀하게 확대·축소합니다.</li>
+                <li>우측 패널의 <b>'스티커/데코 추가'</b>로 올린 이미지는 이 칸 위에 스티커로 얹히며, 모서리 손잡이로 크기·회전 조절, <b>우클릭</b>으로 레이어 순서 변경이 가능합니다.</li>
+            </ul>
+        </div>
+
+        <div class="hud-highlight" id="hud-box-2"></div>
+        <div class="hud-arrow-line" id="hud-arrow-2"></div>
+        <div class="overlay-label" id="hud-label-2">
+            <strong>상세 설명 드래그 정렬</strong>
+            <ul>
+                <li>좌측의 <b>점 6개(·) 손잡이</b>를 꾹 눌러 위아래로 끌면 순서를 바꿀 수 있습니다.</li>
+                <li>항목에 마우스를 올리면 나타나는 <b>× 버튼</b>으로 바로 삭제할 수 있습니다.</li>
+                <li>글씨 크기는 우측 패널 <b>'설명란 글씨 크기'</b> 슬라이더로 조절합니다.</li>
+            </ul>
+        </div>
+
+        <div class="hud-highlight" id="hud-box-3"></div>
+        <div class="hud-arrow-line" id="hud-arrow-3"></div>
+        <div class="overlay-label" id="hud-label-3">
+            <strong>말풍선 커스텀</strong>
+            <ul>
+                <li>좌측 패널에서 <b>1줄/2줄 정렬</b>과 <b>아이콘 종류</b>를 바꿀 수 있습니다.</li>
+                <li>말풍선 왼쪽 <b>아이콘을 클릭</b>하면 색상을 즉시 바꿀 수 있습니다.</li>
+                <li>토글 스위치로 <b>키워드 태그와 말풍선을 각각 켜고 끌</b> 수 있습니다.</li>
+            </ul>
+        </div>
+
+        <div class="hud-highlight" id="hud-box-4"></div>
+        <div class="hud-arrow-line" id="hud-arrow-4"></div>
+        <div class="overlay-label" id="hud-label-4">
+            <strong><svg class="ui-icon" style="stroke:#38bdf8; width:15px; height:15px;"><use href="#icon-tool"/></svg> 우측 유틸리티 패널</strong>
+            <ul>
+                <li><b>캔버스 하단 여백 조절</b> — 설명이 길어져도 잘리지 않게 세로 길이를 늘립니다.</li>
+                <li><b>스티커·팔레트·프로필 박스 추가</b> 버튼으로 구성 요소를 늘릴 수 있습니다.</li>
+                <li><b>서체 선택</b>과 <b>설명란 글씨 크기</b>를 조절합니다.</li>
+                <li><b>PNG/JPEG 저장</b>으로 완성본을 하나의 이미지로 병합 다운로드합니다.</li>
+                <li>더 자세한 내용은 하단의 <b>'사용 설명서 보기'</b>에서 확인하세요.</li>
+            </ul>
+        </div>
+
+        <div class="overlay-label lbl-system-status" id="hud-label-status">
+            <strong>💾 기기 브라우저 내부 안심 저장</strong>
+            <span>
+                새로고침해도 내용이 유지됩니다.<br>
+                단축키 <b>M</b>을 누르거나 좌측의 <b>'집중 편집 모드'</b>를 켜면 훨씬 넓고 쾌적하게 작업할 수 있습니다.
+            </span>
+        </div>
+        <div class="overlay-close-hint">화면 아무 곳이나 클릭하면 가이드가 닫힙니다.</div>
+    </div>
+
+    <!-- 📖 사용설명서 모달: 언제든 열어보는 상세 안내, 캔버스 크기와 무관하게 항상 읽기 편한 크기로 표시 -->
+    <div class="manual-modal-overlay" id="manual-modal" onclick="handleManualBackgroundClick(event)">
+        <div class="manual-modal-box" onclick="event.stopPropagation()">
+            <div class="manual-modal-header">
+                <h2><svg class="ui-icon"><use href="#icon-clipboard"/></svg> 사용 설명서</h2>
+                <button class="manual-modal-close-btn" onclick="toggleManual(false)">×</button>
+            </div>
+            <div class="manual-modal-body">
+                <div class="manual-section">
+                    <h3>1. 캐릭터 인원수 & 편집 대상</h3>
+                    <ul>
+                        <li>좌측 <b>'캔버스 인원수 설정'</b>에서 2~5인 중 필요한 인원 수를 고릅니다.</li>
+                        <li><b>'편집 중인 캐릭터'</b>에서 번호를 누르거나, 캔버스에서 원하는 칸을 직접 클릭하면 그 캐릭터가 편집 대상으로 지정됩니다.</li>
+                        <li><b>'개별 집중 편집 모드'</b>를 켜면 선택한 캐릭터 한 명만 크게 확대해서 편집할 수 있습니다. 끄면 원래 배치로 돌아갑니다.</li>
+                    </ul>
+                </div>
+                <div class="manual-section">
+                    <h3>2. 반신 이미지 업로드</h3>
+                    <ul>
+                        <li>점선 박스를 <b>더블 클릭</b>하면 이미지 업로드 창이 열립니다.</li>
+                        <li>업로드 후 이미지를 <b>드래그</b>하면 위치를, <b>마우스 휠</b>을 굴리면 확대·축소 비율을 조절할 수 있습니다.</li>
+                    </ul>
+                </div>
+                <div class="manual-section">
+                    <h3>3. 스티커 / 데코</h3>
+                    <ul>
+                        <li>우측 패널 <b>'스티커/데코 추가 선택'</b>으로 이미지를 올리면 현재 편집 중인 캐릭터 칸 위에 스티커로 추가됩니다.</li>
+                        <li>스티커를 <b>드래그</b>로 이동, 모서리의 <b>파란 사각형 손잡이</b>로 크기 조절, <b>우측 상단 원형 손잡이</b>로 회전할 수 있습니다.</li>
+                        <li>스티커를 <b>우클릭</b>하면 메뉴가 열려 다른 스티커보다 앞/뒤 레이어 순서를 바꿀 수 있습니다.</li>
+                        <li>스티커에 마우스를 올리면 나타나는 <b>× 버튼</b>으로 삭제합니다.</li>
+                        <li>스티커를 클릭하면 위에 <b>정렬 툴바</b>가 뜨고, 좌/우/상/하/중앙 정렬을 바로 적용할 수 있습니다.</li>
+                        <li><b>Shift(또는 Ctrl)를 누른 채 여러 스티커를 클릭</b>하면 한 번에 여러 개를 선택할 수 있고, 이 상태에서 정렬 버튼을 누르면 <b>선택한 것들끼리</b> 좌/우/상/하/중앙 기준으로 나란히 정렬됩니다.</li>
+                        <li>자석 스냅(우측 패널 상단 토글)을 켜두면 드래그 중 캐릭터 칸의 가장자리·중앙선에 자동으로 달라붙습니다.</li>
+                    </ul>
+                </div>
+                <div class="manual-section">
+                    <h3>4. 성격 키워드 & 한마디 말풍선</h3>
+                    <ul>
+                        <li>좌측 패널에서 키워드 문구와 색상을 각각 입력·지정할 수 있고, <b>'일괄 색상 적용'</b>으로 3개 키워드에 같은 색을 한 번에 적용할 수 있습니다.</li>
+                        <li>각 항목의 토글 스위치로 <b>키워드 태그</b>와 <b>말풍선</b>을 캐릭터별로 켜고 끌 수 있습니다.</li>
+                        <li>말풍선의 <b>정렬(1줄/2줄)</b>과 <b>아이콘(마이크/인용구/표정)</b>을 고를 수 있고, 아이콘을 클릭하면 색을 바꿀 수 있습니다.</li>
+                    </ul>
+                </div>
+                <div class="manual-section">
+                    <h3>5. 이름 · 프로필 박스 · 컬러 팔레트</h3>
+                    <ul>
+                        <li>이름과 영문/한자 표기는 캔버스에서 직접 클릭해 입력합니다.</li>
+                        <li>성별·나이·신장 등의 <b>프로필 박스</b>는 우측 패널 <b>'프로필 박스 추가'</b>로 늘릴 수 있습니다(캐릭터당 최대 6개).</li>
+                        <li><b>컬러 팔레트</b>는 우측 패널 <b>'컬러 팔레트 추가'</b>로 늘릴 수 있고, 각 칸을 클릭해 색을 고르거나 코드로 직접 입력할 수 있습니다.</li>
+                    </ul>
+                </div>
+                <div class="manual-section">
+                    <h3>6. 상세 설명 목록</h3>
+                    <ul>
+                        <li>캐릭터 하단의 <b>'상세 설명 추가'</b> 버튼으로 항목을 늘릴 수 있습니다.</li>
+                        <li>항목 좌측의 <b>점 6개 손잡이</b>를 꾹 눌러 드래그하면 순서를 바꿀 수 있습니다.</li>
+                        <li>글씨 크기는 우측 패널의 <b>'설명란 글씨 크기'</b> 슬라이더로 조절합니다.</li>
+                    </ul>
+                </div>
+                <div class="manual-section">
+                    <h3>7. 우측 유틸리티 패널</h3>
+                    <ul>
+                        <li><b>캔버스 하단 여백 조절</b> — 설명이 길어질 때 캔버스 세로 길이를 늘려 잘리지 않게 합니다.</li>
+                        <li><b>서체 종류 선택</b> — 고딕체/명조체 중 캔버스 전체 글꼴을 고릅니다.</li>
+                        <li><b>PNG / JPEG 고화질 저장</b> — 캔버스를 하나의 이미지로 병합해 다운로드합니다. PNG는 배경 손실 없이, JPEG는 더 가벼운 용량입니다.</li>
+                        <li><b>전체 데이터 초기화</b> — 저장된 모든 내용을 삭제합니다(되돌릴 수 없음).</li>
+                    </ul>
+                </div>
+                <div class="manual-section">
+                    <h3>8. 저장 & 단축키</h3>
+                    <ul>
+                        <li>모든 작업은 <b>기기 브라우저 안에 자동으로 저장</b>되어 새로고침해도 유지됩니다.</li>
+                        <li>단축키 <b>M</b>을 누르면 좌우 패널을 숨기고 캔버스를 넓게 볼 수 있습니다.</li>
+                        <li><b>Esc</b> 키로 이 사용설명서나 시작 가이드를 닫을 수 있습니다.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentTargetChar = "1"; 
         let paletteCounts = { "1": 2, "2": 2, "3": 2, "4": 2, "5": 2 };
         let charSettings = {};
+        let snapEnabled = true;
+        let selectedStickers = [];
+        let dragGuideV = null, dragGuideH = null;
 
-        // 💡 시작 오버레이 열기/닫기 로직 (HUD 전용)
-        function toggleHelpOverlay() {
-            const overlay = document.getElementById('canvas-help-overlay');
-            overlay.classList.toggle('active');
-            localStorage.setItem('commission_guide_v8_hud', 'seen');
+        // 💡 전체 화면 HUD 가이드: 실제 요소의 화면 좌표(getBoundingClientRect)를 기준으로
+        //    박스/화살표/설명 카드를 배치합니다. 캔버스가 축소되어도 항상 정확한 위치를 가리키고,
+        //    설명 글씨는 항상 고정된 크기로 표시됩니다.
+        let helpOverlayPrevState = null;
+        let hudResizeHandler = null;
+
+        function clampNum(val, min, max) { return Math.max(min, Math.min(max, val)); }
+
+        function positionHudGuide() {
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+
+            const configs = [
+                { boxId: 'hud-box-1', arrowId: 'hud-arrow-1', labelId: 'hud-label-1', target: document.getElementById('c1-bust-upload-zone'), side: 'right' },
+                { boxId: 'hud-box-2', arrowId: 'hud-arrow-2', labelId: 'hud-label-2', target: document.querySelector('#char-col-2 .desc-list-wrapper'), side: 'right' },
+                { boxId: 'hud-box-3', arrowId: 'hud-arrow-3', labelId: 'hud-label-3', target: document.getElementById('c3-speech-bubble-layer'), side: 'right' },
+                { boxId: 'hud-box-4', arrowId: 'hud-arrow-4', labelId: 'hud-label-4', target: document.querySelectorAll('.sidebar-panel')[1], side: 'left' }
+            ];
+
+            configs.forEach(cfg => {
+                const box = document.getElementById(cfg.boxId);
+                const arrow = document.getElementById(cfg.arrowId);
+                const label = document.getElementById(cfg.labelId);
+                const rect = cfg.target ? cfg.target.getBoundingClientRect() : null;
+
+                if (!rect || rect.width === 0 || rect.height === 0) {
+                    box.style.display = 'none'; arrow.style.display = 'none'; label.style.display = 'none';
+                    return;
+                }
+                box.style.display = 'block'; arrow.style.display = 'block'; label.style.display = 'block';
+
+                box.style.left = (rect.left - 4) + 'px';
+                box.style.top = (rect.top - 4) + 'px';
+                box.style.width = (rect.width + 8) + 'px';
+                box.style.height = (rect.height + 8) + 'px';
+
+                const labelWidth = 320;
+                const labelHeight = label.offsetHeight || 150;
+                const gap = 46;
+                let startX = 0, startY = 0, endX = 0, labelLeft = 0, labelTop = 0;
+
+                if (cfg.side === 'right') {
+                    startX = rect.right; startY = rect.top + rect.height / 2; endX = startX + gap;
+                    labelLeft = endX + 8;
+                    labelTop = clampNum(startY - labelHeight / 2, 16, vh - labelHeight - 16);
+                    if (labelLeft + labelWidth > vw - 16) {
+                        labelLeft = clampNum(rect.left, 16, vw - labelWidth - 16);
+                        labelTop = clampNum(rect.bottom + 16, 16, vh - labelHeight - 16);
+                        arrow.style.display = 'none';
+                    }
+                } else {
+                    startX = rect.left; startY = rect.top + rect.height / 2; endX = startX - gap;
+                    labelLeft = endX - labelWidth - 8;
+                    labelTop = clampNum(startY - labelHeight / 2, 16, vh - labelHeight - 16);
+                    if (labelLeft < 16) {
+                        labelLeft = clampNum(rect.left, 16, vw - labelWidth - 16);
+                        labelTop = clampNum(rect.top - labelHeight - 16, 16, vh - labelHeight - 16);
+                        arrow.style.display = 'none';
+                    }
+                }
+
+                label.style.left = labelLeft + 'px';
+                label.style.top = labelTop + 'px';
+
+                if (arrow.style.display !== 'none') {
+                    const length = Math.abs(endX - startX);
+                    arrow.style.width = length + 'px';
+                    arrow.style.left = Math.min(startX, endX) + 'px';
+                    arrow.style.top = startY + 'px';
+                    arrow.style.transform = (endX < startX) ? 'scaleX(-1)' : 'none';
+                }
+            });
         }
 
-        document.addEventListener("DOMContentLoaded", () => {
-            if (!localStorage.getItem('commission_guide_v8_hud')) {
-                document.getElementById('canvas-help-overlay').classList.add('active');
+        function scheduleHudReposition() {
+            // 캔버스 크기 변경(updateColumnVisibility) 후 반응형 축소(autoResponsiveScale)가
+            // 약간의 지연을 두고 뒤늦게 적용되고, 웹폰트 로딩으로도 레이아웃이 미세하게 바뀔 수
+            // 있어서 여러 시점에 걸쳐 다시 계산합니다.
+            requestAnimationFrame(positionHudGuide);
+            setTimeout(positionHudGuide, 160);
+            setTimeout(positionHudGuide, 420);
+        }
+
+        function toggleHelpOverlay() {
+            const overlay = document.getElementById('canvas-help-overlay');
+            if (overlay.classList.contains('active')) closeHelpOverlay();
+            else openHelpOverlay();
+        }
+
+        function openHelpOverlay() {
+            const overlay = document.getElementById('canvas-help-overlay');
+
+            // 모든 대상이 화면에 보이도록 5인 구성 + 집중모드 해제 상태로 잠시 전환합니다.
+            helpOverlayPrevState = {
+                memberCount: document.querySelector('input[name="member-count-choice"]:checked')?.value,
+                focusMode: document.getElementById('focus-mode-toggle').checked
+            };
+            const countRadio5 = document.querySelector('input[name="member-count-choice"][value="5"]');
+            if (countRadio5) countRadio5.checked = true;
+            document.getElementById('focus-mode-toggle').checked = false;
+            updateColumnVisibility();
+
+            overlay.classList.add('active');
+
+            scheduleHudReposition();
+
+            hudResizeHandler = () => scheduleHudReposition();
+            window.addEventListener('resize', hudResizeHandler);
+        }
+
+        function closeHelpOverlay() {
+            const overlay = document.getElementById('canvas-help-overlay');
+            overlay.classList.remove('active');
+
+            if (hudResizeHandler) { window.removeEventListener('resize', hudResizeHandler); hudResizeHandler = null; }
+
+            if (helpOverlayPrevState) {
+                const countRadio = document.querySelector(`input[name="member-count-choice"][value="${helpOverlayPrevState.memberCount}"]`);
+                if (countRadio) countRadio.checked = true;
+                document.getElementById('focus-mode-toggle').checked = helpOverlayPrevState.focusMode;
+                updateColumnVisibility();
+                helpOverlayPrevState = null;
             }
+        }
+
+        function handleOverlayBackgroundClick() { closeHelpOverlay(); }
+
+        // 📖 사용설명서 모달 열기/닫기
+        function toggleManual(show) {
+            const modal = document.getElementById('manual-modal');
+            if (show) modal.classList.add('active');
+            else modal.classList.remove('active');
+        }
+        function handleManualBackgroundClick() { toggleManual(false); }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            // 페이지를 새로고침하거나 다시 열 때마다 시작 가이드를 자동으로 보여줍니다.
+            openHelpOverlay();
         });
 
         // 웹 데이터베이스(IndexedDB) 모듈
@@ -722,6 +1013,11 @@
         }
 
         document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                toggleManual(false);
+                closeHelpOverlay();
+                return;
+            }
             if (e.key.toLowerCase() === 'm' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
                 toggleSidebars();
             }
@@ -869,6 +1165,148 @@
             triggerAutoSave();
         }
 
+        // 자석 스냅 가이드선 생성/제거
+        function createDragGuides(column) {
+            removeDragGuides();
+            const v = document.createElement('div');
+            v.className = 'snap-guide-line snap-guide-v';
+            const h = document.createElement('div');
+            h.className = 'snap-guide-line snap-guide-h';
+            column.appendChild(v);
+            column.appendChild(h);
+            dragGuideV = v; dragGuideH = h;
+        }
+        function removeDragGuides() {
+            if (dragGuideV) { dragGuideV.remove(); dragGuideV = null; }
+            if (dragGuideH) { dragGuideH.remove(); dragGuideH = null; }
+        }
+
+        // 스티커 선택 & 정렬 툴바 (다중 선택 지원: Shift/Ctrl+클릭으로 추가/제외)
+        function selectSticker(sticker) {
+            selectedStickers.forEach(s => s.classList.remove('selected'));
+            selectedStickers = [sticker];
+            sticker.classList.add('selected');
+            repositionAlignToolbar();
+        }
+
+        function toggleStickerSelection(sticker) {
+            const idx = selectedStickers.indexOf(sticker);
+            if (idx >= 0) {
+                selectedStickers.splice(idx, 1);
+                sticker.classList.remove('selected');
+            } else {
+                selectedStickers.push(sticker);
+                sticker.classList.add('selected');
+            }
+            repositionAlignToolbar();
+        }
+
+        function deselectSticker() {
+            selectedStickers.forEach(s => s.classList.remove('selected'));
+            selectedStickers = [];
+            document.getElementById('sticker-align-toolbar').style.display = 'none';
+        }
+
+        function repositionAlignToolbar() {
+            const toolbar = document.getElementById('sticker-align-toolbar');
+            const countBadge = document.getElementById('align-toolbar-count');
+            if (!selectedStickers.length) { toolbar.style.display = 'none'; return; }
+
+            const rects = selectedStickers.map(s => s.getBoundingClientRect());
+            const left = Math.min(...rects.map(r => r.left));
+            const right = Math.max(...rects.map(r => r.right));
+            const top = Math.min(...rects.map(r => r.top));
+            const bottom = Math.max(...rects.map(r => r.bottom));
+
+            toolbar.style.display = 'flex';
+            if (selectedStickers.length > 1) { countBadge.textContent = selectedStickers.length + '개 선택'; countBadge.style.display = 'inline'; }
+            else { countBadge.style.display = 'none'; }
+
+            const tw = toolbar.offsetWidth || 220;
+            let tLeft = clampNum(left + (right - left) / 2 - tw / 2, 8, window.innerWidth - tw - 8);
+            let tTop = top - 46;
+            if (tTop < 8) tTop = bottom + 10;
+            toolbar.style.left = tLeft + 'px';
+            toolbar.style.top = tTop + 'px';
+        }
+
+        function alignSingleToColumnBounds(st, direction) {
+            const col = st.parentElement;
+            const colW = col.clientWidth, colH = col.clientHeight;
+            const stW = st.offsetWidth, stH = st.offsetHeight;
+            if (direction === 'left') st.style.left = '0px';
+            else if (direction === 'center-h') st.style.left = ((colW - stW) / 2) + 'px';
+            else if (direction === 'right') st.style.left = (colW - stW) + 'px';
+            else if (direction === 'top') st.style.top = '0px';
+            else if (direction === 'center-v') st.style.top = ((colH - stH) / 2) + 'px';
+            else if (direction === 'bottom') st.style.top = (colH - stH) + 'px';
+        }
+
+        function alignSticker(direction) {
+            if (!selectedStickers.length) return;
+
+            // 서로 다른 캐릭터 칸에 걸쳐 선택했을 수 있으므로, 칸별로 묶어서 처리합니다.
+            const groups = {};
+            selectedStickers.forEach(st => {
+                const colId = st.parentElement.id;
+                if (!groups[colId]) groups[colId] = [];
+                groups[colId].push(st);
+            });
+
+            Object.values(groups).forEach(items => {
+                if (items.length === 1) {
+                    // 하나만 선택된 경우: 캐릭터 칸(부모) 기준으로 정렬
+                    alignSingleToColumnBounds(items[0], direction);
+                    return;
+                }
+                // 여러 개 선택된 경우: 선택된 스티커들끼리의 기준선(바운딩 박스)에 맞춰 정렬
+                const data = items.map(st => ({ st, left: parseFloat(st.style.left) || 0, top: parseFloat(st.style.top) || 0, w: st.offsetWidth, h: st.offsetHeight }));
+                if (direction === 'left') {
+                    const v = Math.min(...data.map(d => d.left));
+                    data.forEach(d => d.st.style.left = v + 'px');
+                } else if (direction === 'right') {
+                    const v = Math.max(...data.map(d => d.left + d.w));
+                    data.forEach(d => d.st.style.left = (v - d.w) + 'px');
+                } else if (direction === 'center-h') {
+                    const minL = Math.min(...data.map(d => d.left));
+                    const maxR = Math.max(...data.map(d => d.left + d.w));
+                    const c = (minL + maxR) / 2;
+                    data.forEach(d => d.st.style.left = (c - d.w / 2) + 'px');
+                } else if (direction === 'top') {
+                    const v = Math.min(...data.map(d => d.top));
+                    data.forEach(d => d.st.style.top = v + 'px');
+                } else if (direction === 'bottom') {
+                    const v = Math.max(...data.map(d => d.top + d.h));
+                    data.forEach(d => d.st.style.top = (v - d.h) + 'px');
+                } else if (direction === 'center-v') {
+                    const minT = Math.min(...data.map(d => d.top));
+                    const maxB = Math.max(...data.map(d => d.top + d.h));
+                    const c = (minT + maxB) / 2;
+                    data.forEach(d => d.st.style.top = (c - d.h / 2) + 'px');
+                }
+            });
+
+            repositionAlignToolbar();
+            triggerAutoSave();
+        }
+
+        function deleteStickerEl(btn) {
+            const el = btn.parentElement;
+            const idx = selectedStickers.indexOf(el);
+            if (idx >= 0) selectedStickers.splice(idx, 1);
+            el.remove();
+            if (!selectedStickers.length) document.getElementById('sticker-align-toolbar').style.display = 'none';
+            else repositionAlignToolbar();
+            triggerAutoSave();
+        }
+
+        document.addEventListener('mousedown', (e) => {
+            if (!e.target.closest('.draggable-sticker') && !e.target.closest('#sticker-align-toolbar')) {
+                deselectSticker();
+            }
+        });
+        window.addEventListener('resize', () => repositionAlignToolbar());
+
 
         // DB 영구 저장 로직
         async function saveAllDataToDB() {
@@ -913,7 +1351,8 @@
                 fontSize: document.getElementById('font-slider').value,
                 canvasExt: document.getElementById('height-slider').value,
                 memberCount: document.querySelector('input[name="member-count-choice"]:checked')?.value || '5',
-                focusMode: document.getElementById('focus-mode-toggle').checked
+                focusMode: document.getElementById('focus-mode-toggle').checked,
+                snapEnabled: snapEnabled
             };
             
             await dbHelper.save('commission_v9_data', data);
@@ -956,6 +1395,11 @@
 
                         if(g.focusMode !== undefined) {
                             document.getElementById('focus-mode-toggle').checked = g.focusMode;
+                        }
+
+                        if(g.snapEnabled !== undefined) {
+                            snapEnabled = g.snapEnabled;
+                            document.getElementById('snap-toggle').checked = snapEnabled;
                         }
                     }
 
@@ -1003,7 +1447,7 @@
                                     sticker.dataset.zIndex = stData.zIndex || 100;
                                     sticker.dataset.angle = stData.angle || 0;
                                     sticker.style.transform = `rotate(${stData.angle || 0}deg)`;
-                                    sticker.innerHTML = `<img src="${stData.src}"><button class="delete-sticker-btn" onclick="this.parentElement.remove(); triggerAutoSave();">×</button><div class="rotate-sticker-handle" title="회전"><svg class="ui-icon-fill"><use href="#icon-rotate"/></svg></div><div class="resize-sticker-handle" title="크기"></div>`;
+                                    sticker.innerHTML = `<img src="${stData.src}"><button class="delete-sticker-btn" onclick="deleteStickerEl(this);">×</button><div class="rotate-sticker-handle" title="회전"><svg class="ui-icon-fill"><use href="#icon-rotate"/></svg></div><div class="resize-sticker-handle" title="크기"></div>`;
                                     document.getElementById(`char-col-${i}`).appendChild(sticker);
                                     bindStickerEvents(sticker);
                                 });
@@ -1311,7 +1755,7 @@
                     sticker.className = 'draggable-sticker';
                     sticker.style.left = '50px'; sticker.style.top = '250px'; sticker.style.width = '180px';
                     sticker.dataset.angle = 0; sticker.style.zIndex = 100;
-                    sticker.innerHTML = `<img src="${e.target.result}"><button class="delete-sticker-btn" onclick="this.parentElement.remove(); triggerAutoSave();">×</button><div class="rotate-sticker-handle" title="회전"><svg class="ui-icon-fill"><use href="#icon-rotate"/></svg></div><div class="resize-sticker-handle" title="크기"></div>`;
+                    sticker.innerHTML = `<img src="${e.target.result}"><button class="delete-sticker-btn" onclick="deleteStickerEl(this);">×</button><div class="rotate-sticker-handle" title="회전"><svg class="ui-icon-fill"><use href="#icon-rotate"/></svg></div><div class="resize-sticker-handle" title="크기"></div>`;
                     
                     document.getElementById(`char-col-${currentTargetChar}`).appendChild(sticker);
                     bindStickerEvents(sticker);
@@ -1326,19 +1770,69 @@
             sticker.addEventListener('mousedown', function(dragEvent) {
                 if (['delete-sticker-btn', 'resize-sticker-handle', 'rotate-sticker-handle'].includes(dragEvent.target.className) || dragEvent.target.closest('.rotate-sticker-handle')) return;
                 if(dragEvent.button === 2) return; 
+
+                const additive = dragEvent.shiftKey || dragEvent.ctrlKey || dragEvent.metaKey;
+                if (additive) {
+                    // Shift/Ctrl(⌘)+클릭: 이동 없이 선택 목록에 추가/제외만 합니다.
+                    toggleStickerSelection(sticker);
+                    dragEvent.preventDefault();
+                    return;
+                }
+
+                selectSticker(sticker);
                 isDragging = true; diffX = dragEvent.clientX - sticker.offsetLeft; diffY = dragEvent.clientY - sticker.offsetTop;
+                document.getElementById('sticker-align-toolbar').style.display = 'none';
+                if (snapEnabled) createDragGuides(sticker.parentElement);
                 dragEvent.preventDefault();
             });
-            sticker.querySelector('.resize-sticker-handle').addEventListener('mousedown', function(resizeEvent) { isResizing = true; startWidth = sticker.clientWidth; startMouseX = resizeEvent.clientX; resizeEvent.preventDefault(); resizeEvent.stopPropagation(); });
-            sticker.querySelector('.rotate-sticker-handle').addEventListener('mousedown', function(rotateEvent) { isRotating = true; const rect = sticker.getBoundingClientRect(); centerPointX = rect.left + rect.width / 2; centerPointY = rect.top + rect.height / 2; rotateEvent.preventDefault(); rotateEvent.stopPropagation(); });
+            sticker.querySelector('.resize-sticker-handle').addEventListener('mousedown', function(resizeEvent) { isResizing = true; startWidth = sticker.clientWidth; startMouseX = resizeEvent.clientX; selectSticker(sticker); resizeEvent.preventDefault(); resizeEvent.stopPropagation(); });
+            sticker.querySelector('.rotate-sticker-handle').addEventListener('mousedown', function(rotateEvent) { isRotating = true; const rect = sticker.getBoundingClientRect(); centerPointX = rect.left + rect.width / 2; centerPointY = rect.top + rect.height / 2; selectSticker(sticker); rotateEvent.preventDefault(); rotateEvent.stopPropagation(); });
             
             document.addEventListener('mousemove', function(moveEvent) {
-                if (isDragging) { sticker.style.left = `${moveEvent.clientX - diffX}px`; sticker.style.top = `${moveEvent.clientY - diffY}px`; }
+                if (isDragging) {
+                    let newLeft = moveEvent.clientX - diffX;
+                    let newTop = moveEvent.clientY - diffY;
+
+                    let snappedX = false, snappedY = false;
+                    if (snapEnabled) {
+                        const col = sticker.parentElement;
+                        const colW = col.clientWidth, colH = col.clientHeight;
+                        const stW = sticker.offsetWidth, stH = sticker.offsetHeight;
+                        const T = 8;
+                        const xTargets = [ { pos: 0, guide: 0 }, { pos: (colW - stW) / 2, guide: colW / 2 }, { pos: colW - stW, guide: colW } ];
+                        const yTargets = [ { pos: 0, guide: 0 }, { pos: (colH - stH) / 2, guide: colH / 2 }, { pos: colH - stH, guide: colH } ];
+
+                        for (const t of xTargets) {
+                            if (Math.abs(newLeft - t.pos) < T) {
+                                newLeft = t.pos;
+                                if (dragGuideV) { dragGuideV.style.left = t.guide + 'px'; dragGuideV.classList.add('visible'); }
+                                snappedX = true; break;
+                            }
+                        }
+                        for (const t of yTargets) {
+                            if (Math.abs(newTop - t.pos) < T) {
+                                newTop = t.pos;
+                                if (dragGuideH) { dragGuideH.style.top = t.guide + 'px'; dragGuideH.classList.add('visible'); }
+                                snappedY = true; break;
+                            }
+                        }
+                        if (!snappedX && dragGuideV) dragGuideV.classList.remove('visible');
+                        if (!snappedY && dragGuideH) dragGuideH.classList.remove('visible');
+                    }
+
+                    sticker.style.left = newLeft + 'px';
+                    sticker.style.top = newTop + 'px';
+                }
                 if (isResizing) { sticker.style.width = `${Math.max(30, startWidth + (moveEvent.clientX - startMouseX))}px`; }
                 if (isRotating) { let angleDegrees = Math.atan2(moveEvent.clientY - centerPointY, moveEvent.clientX - centerPointX) * (180 / Math.PI) + 45; sticker.dataset.angle = angleDegrees; sticker.style.transform = `rotate(${angleDegrees}deg)`; }
             });
             document.addEventListener('mouseup', function() { 
-                if (isDragging || isResizing || isRotating) { isDragging = isResizing = isRotating = false; triggerAutoSave(); }
+                if (isDragging || isResizing || isRotating) {
+                    isDragging = isResizing = isRotating = false;
+                    removeDragGuides();
+                    if (selectedStickers.includes(sticker)) repositionAlignToolbar();
+                    triggerAutoSave();
+                }
             });
         }
 
