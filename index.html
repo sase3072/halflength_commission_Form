@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>다인원 반신 커미션 폼</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <title>다인원 반신 커미션 폼 (HUD 가이드 업데이트)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@400;500;700;900&family=Noto+Sans+JP:wght@100..900&family=Noto+Serif+JP:wght@200..900&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         @font-face {
@@ -24,7 +26,7 @@
             --primary-color: #38bdf8; 
             --primary-hover: #0ea5e9;
             --desc-font-size: 12px;
-            --main-font: 'Noto Sans KR', sans-serif;
+            --main-font: 'Noto Sans KR', 'Noto Sans JP', sans-serif;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--main-font); font-weight: 500; }
@@ -177,21 +179,33 @@
         
         /* 💡 HUD 가이드 오버레이 스타일 */
         /* 💡 전체 화면 고정형 HUD 가이드: 캔버스 축소 배율과 무관하게 항상 실제 크기로 표시됩니다 */
+        /* 화면 전체 고정형 HUD: 번호 배지 + 하단 통합 설명 패널로 항상 같은 자리에 정돈됩니다 */
         .canvas-overlay-guide { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(4px); z-index: 99998; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; user-select: none; cursor: pointer; }
         .canvas-overlay-guide.active { opacity: 1; pointer-events: auto; }
         .hud-highlight { position: fixed; border: 2px dashed #38bdf8; background: rgba(56, 189, 248, 0.06); border-radius: 12px; pointer-events: none; box-shadow: 0 0 18px rgba(56, 189, 248, 0.18); transition: left 0.15s ease, top 0.15s ease, width 0.15s ease, height 0.15s ease; }
-        .hud-arrow-line { position: fixed; height: 2px; background: #38bdf8; pointer-events: none; box-shadow: 0 0 8px #38bdf8; }
-        .hud-arrow-line::after { content: ''; position: absolute; right: -2px; top: -4px; border-width: 5px 0 5px 6px; border-style: solid; border-color: transparent transparent transparent #38bdf8; }
-        .overlay-label { position: fixed; background: rgba(15, 23, 42, 0.97); border: 1px solid rgba(56, 189, 248, 0.4); padding: 16px 18px; border-radius: 14px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6); z-index: 100000; width: 320px; cursor: default; }
-        .overlay-label strong { display: block; color: #ffffff; font-size: 15px; font-weight: 800; letter-spacing: 0.3px; border-bottom: 1px solid rgba(255, 255, 255, 0.15); padding-bottom: 8px; margin-bottom: 10px; }
-        .overlay-label ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
-        .overlay-label li { position: relative; padding-left: 14px; color: #e2e8f0; font-size: 13px; line-height: 1.55; letter-spacing: -0.1px; font-weight: 500; }
-        .overlay-label li::before { content: "•"; position: absolute; left: 0; top: -1px; color: #38bdf8; font-size: 15px; }
-        .overlay-label li b { color: #ffffff; font-weight: 700; }
-        .lbl-system-status { bottom: 40px; right: 40px; width: 330px; background: #10b981; border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3); text-align: right; }
-        .lbl-system-status strong { border: none; color: #ffffff; font-size: 14px; padding-bottom: 2px; margin-bottom: 2px; }
-        .lbl-system-status span { display: block; color: #ecfdf5; font-size: 12.5px; line-height: 1.6; }
-        .overlay-close-hint { position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); font-size: 12px; color: rgba(255, 255, 255, 0.7); background: rgba(0, 0, 0, 0.5); padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.15); font-weight: 700; z-index: 100000; }
+        .hud-num { position: fixed; width: 26px; height: 26px; border-radius: 50%; background: #38bdf8; color: #0f172a; font-size: 13px; font-weight: 900; display: flex; align-items: center; justify-content: center; pointer-events: none; box-shadow: 0 3px 10px rgba(0,0,0,0.4); z-index: 100001; transition: left 0.15s ease, top 0.15s ease; }
+
+        .hud-guide-panel { position: fixed; left: 20px; right: 20px; bottom: 20px; background: rgba(15, 23, 42, 0.97); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.55); z-index: 100000; padding: 16px 18px; cursor: default; }
+        .hud-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.12); }
+        .hud-panel-head h3 { color: #ffffff; font-size: 14px; font-weight: 800; display: flex; align-items: center; gap: 7px; }
+        .hud-panel-head .hud-save-note { color: #6ee7b7; font-size: 11.5px; font-weight: 700; display: flex; align-items: center; gap: 5px; text-align: right; }
+        .hud-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+        .hud-card { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+        .hud-card-title { display: flex; align-items: center; gap: 7px; color: #ffffff; font-size: 13px; font-weight: 800; }
+        .hud-card-title span.num { width: 20px; height: 20px; border-radius: 50%; background: #38bdf8; color: #0f172a; font-size: 11px; font-weight: 900; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .hud-card ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 5px; }
+        .hud-card li { position: relative; padding-left: 11px; color: #cbd5e1; font-size: 12px; line-height: 1.5; font-weight: 500; }
+        .hud-card li::before { content: "\2022"; position: absolute; left: 0; top: -1px; color: #38bdf8; }
+        .hud-card li b { color: #ffffff; font-weight: 700; }
+        .overlay-close-hint { position: fixed; top: 18px; left: 50%; transform: translateX(-50%); font-size: 12px; color: rgba(255, 255, 255, 0.75); background: rgba(0, 0, 0, 0.55); padding: 7px 16px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.18); font-weight: 700; z-index: 100001; }
+
+        @media (max-width: 1200px) { .hud-grid { grid-template-columns: repeat(2, 1fr); } .hud-guide-panel { max-height: 62vh; overflow-y: auto; } }
+        @media (max-width: 680px) {
+            .hud-grid { grid-template-columns: 1fr; }
+            .hud-guide-panel { left: 10px; right: 10px; bottom: 10px; padding: 14px; max-height: 68vh; }
+            .hud-panel-head { flex-direction: column; align-items: flex-start; gap: 6px; }
+            .hud-panel-head .hud-save-note { text-align: left; }
+        }
 
         /* 📖 사용설명서 모달 (항상 고정된 읽기 편한 글씨 크기) */
         .manual-modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(3px); z-index: 200000; display: none; align-items: center; justify-content: center; padding: 30px; }
@@ -665,61 +679,54 @@
 
     <!-- 💡 전체 화면 고정형 HUD 가이드: 캔버스 스케일과 무관하게 항상 실제 크기로 표시됩니다 -->
     <div class="canvas-overlay-guide" id="canvas-help-overlay" onclick="handleOverlayBackgroundClick(event)">
+        <div class="hud-highlight" id="hud-box-1"></div><div class="hud-num" id="hud-num-1">1</div>
+        <div class="hud-highlight" id="hud-box-2"></div><div class="hud-num" id="hud-num-2">2</div>
+        <div class="hud-highlight" id="hud-box-3"></div><div class="hud-num" id="hud-num-3">3</div>
+        <div class="hud-highlight" id="hud-box-4"></div><div class="hud-num" id="hud-num-4">4</div>
 
-        <div class="hud-highlight" id="hud-box-1"></div>
-        <div class="hud-arrow-line" id="hud-arrow-1"></div>
-        <div class="overlay-label" id="hud-label-1">
-            <strong>이미지 조작 & 스티커 레이어</strong>
-            <ul>
-                <li>점선 박스를 <b>더블 클릭</b>하면 반신 이미지를 업로드할 수 있습니다.</li>
-                <li>업로드한 이미지를 <b>드래그</b>로 옮기고, <b>마우스 휠</b>로 정밀하게 확대·축소합니다.</li>
-                <li>우측 패널의 <b>'스티커/데코 추가'</b>로 올린 이미지는 이 칸 위에 스티커로 얹히며, 모서리 손잡이로 크기·회전 조절, <b>우클릭</b>으로 레이어 순서 변경이 가능합니다.</li>
-            </ul>
-        </div>
+        <div class="overlay-close-hint">화면 아무 곳이나 클릭하면 가이드가 닫힙니다. (Esc)</div>
 
-        <div class="hud-highlight" id="hud-box-2"></div>
-        <div class="hud-arrow-line" id="hud-arrow-2"></div>
-        <div class="overlay-label" id="hud-label-2">
-            <strong>상세 설명 드래그 정렬</strong>
-            <ul>
-                <li>좌측의 <b>점 6개(·) 손잡이</b>를 꾹 눌러 위아래로 끌면 순서를 바꿀 수 있습니다.</li>
-                <li>항목에 마우스를 올리면 나타나는 <b>× 버튼</b>으로 바로 삭제할 수 있습니다.</li>
-                <li>글씨 크기는 우측 패널 <b>'설명란 글씨 크기'</b> 슬라이더로 조절합니다.</li>
-            </ul>
+        <div class="hud-guide-panel" onclick="event.stopPropagation()">
+            <div class="hud-panel-head">
+                <h3><svg class="ui-icon" style="stroke:#38bdf8;"><use href="#icon-bulb"/></svg> 조작 가이드 &mdash; 번호를 캔버스와 맞춰 보세요</h3>
+                <div class="hud-save-note"><svg class="ui-icon" style="stroke:#6ee7b7;width:14px;height:14px;"><use href="#icon-check"/></svg> 브라우저에 자동 저장되어 새로고침해도 유지됩니다 &middot; 단축키 M으로 양쪽 메뉴를 접을 수 있습니다</div>
+            </div>
+            <div class="hud-grid">
+                <div class="hud-card">
+                    <div class="hud-card-title"><span class="num">1</span> 이미지 &amp; 스티커</div>
+                    <ul>
+                        <li>점선 박스를 <b>더블 클릭</b>해 반신 이미지를 올립니다.</li>
+                        <li><b>드래그</b>로 이동, <b>마우스 휠</b>로 확대·축소합니다.</li>
+                        <li>스티커는 손잡이로 크기·회전 조절, <b>우클릭</b>으로 앞뒤 순서를 바꿉니다.</li>
+                    </ul>
+                </div>
+                <div class="hud-card">
+                    <div class="hud-card-title"><span class="num">2</span> 상세 설명 정렬</div>
+                    <ul>
+                        <li>좌측 <b>점 6개 손잡이</b>를 눌러 위아래로 끌면 순서가 바뀝니다.</li>
+                        <li>마우스를 올리면 나타나는 <b>&times; 버튼</b>으로 삭제합니다.</li>
+                        <li>글씨 크기는 우측 <b>설명란 글씨 크기</b>로 조절합니다.</li>
+                    </ul>
+                </div>
+                <div class="hud-card">
+                    <div class="hud-card-title"><span class="num">3</span> 말풍선 커스텀</div>
+                    <ul>
+                        <li>좌측 패널에서 <b>1줄/2줄</b> 정렬과 아이콘을 고릅니다.</li>
+                        <li>말풍선 <b>아이콘 클릭</b> 시 색상이 즉시 바뀝니다.</li>
+                        <li>토글로 <b>키워드 태그와 말풍선</b>을 각각 켜고 끕니다.</li>
+                    </ul>
+                </div>
+                <div class="hud-card">
+                    <div class="hud-card-title"><span class="num">4</span> 유틸리티 패널</div>
+                    <ul>
+                        <li><b>자석 스냅</b>을 켜면 스티커가 가장자리·중앙선에 붙습니다.</li>
+                        <li>스티커를 클릭하면 <b>정렬 툴바</b>가 뜨고, <b>Shift+클릭</b>으로 여러 개를 선택합니다.</li>
+                        <li>캔버스 여백·서체·글씨 크기를 조절하고 <b>PNG·JPEG</b>로 저장합니다.</li>
+                        <li>자세한 내용은 <b>사용 설명서</b>에서 확인하세요.</li>
+                    </ul>
+                </div>
+            </div>
         </div>
-
-        <div class="hud-highlight" id="hud-box-3"></div>
-        <div class="hud-arrow-line" id="hud-arrow-3"></div>
-        <div class="overlay-label" id="hud-label-3">
-            <strong>말풍선 커스텀</strong>
-            <ul>
-                <li>좌측 패널에서 <b>1줄/2줄 정렬</b>과 <b>아이콘 종류</b>를 바꿀 수 있습니다.</li>
-                <li>말풍선 왼쪽 <b>아이콘을 클릭</b>하면 색상을 즉시 바꿀 수 있습니다.</li>
-                <li>토글 스위치로 <b>키워드 태그와 말풍선을 각각 켜고 끌</b> 수 있습니다.</li>
-            </ul>
-        </div>
-
-        <div class="hud-highlight" id="hud-box-4"></div>
-        <div class="hud-arrow-line" id="hud-arrow-4"></div>
-        <div class="overlay-label" id="hud-label-4">
-            <strong><svg class="ui-icon" style="stroke:#38bdf8; width:15px; height:15px;"><use href="#icon-tool"/></svg> 우측 유틸리티 패널</strong>
-            <ul>
-                <li><b>캔버스 하단 여백 조절</b> — 설명이 길어져도 잘리지 않게 세로 길이를 늘립니다.</li>
-                <li><b>스티커·팔레트·프로필 박스 추가</b> 버튼으로 구성 요소를 늘릴 수 있습니다.</li>
-                <li><b>서체 선택</b>과 <b>설명란 글씨 크기</b>를 조절합니다.</li>
-                <li><b>PNG/JPEG 저장</b>으로 완성본을 하나의 이미지로 병합 다운로드합니다.</li>
-                <li>더 자세한 내용은 하단의 <b>'사용 설명서 보기'</b>에서 확인하세요.</li>
-            </ul>
-        </div>
-
-        <div class="overlay-label lbl-system-status" id="hud-label-status">
-            <strong>💾 기기 브라우저 내부 안심 저장</strong>
-            <span>
-                새로고침해도 내용이 유지됩니다.<br>
-                단축키 <b>M</b>을 누르거나 좌측의 <b>'집중 편집 모드'</b>를 켜면 훨씬 넓고 쾌적하게 작업할 수 있습니다.
-            </span>
-        </div>
-        <div class="overlay-close-hint">화면 아무 곳이나 클릭하면 가이드가 닫힙니다.</div>
     </div>
 
     <!-- 📖 사용설명서 모달: 언제든 열어보는 상세 안내, 캔버스 크기와 무관하게 항상 읽기 편한 크기로 표시 -->
@@ -818,69 +825,33 @@
 
         function clampNum(val, min, max) { return Math.max(min, Math.min(max, val)); }
 
+        // 번호 배지는 대상 요소 위에, 설명은 하단 패널에 고정 배치되어 항상 정돈된 상태를 유지합니다.
         function positionHudGuide() {
-            const vw = window.innerWidth;
-            const vh = window.innerHeight;
-
-            const configs = [
-                { boxId: 'hud-box-1', arrowId: 'hud-arrow-1', labelId: 'hud-label-1', target: document.getElementById('c1-bust-upload-zone'), side: 'right' },
-                { boxId: 'hud-box-2', arrowId: 'hud-arrow-2', labelId: 'hud-label-2', target: document.querySelector('#char-col-2 .desc-list-wrapper'), side: 'right' },
-                { boxId: 'hud-box-3', arrowId: 'hud-arrow-3', labelId: 'hud-label-3', target: document.getElementById('c3-speech-bubble-layer'), side: 'right' },
-                { boxId: 'hud-box-4', arrowId: 'hud-arrow-4', labelId: 'hud-label-4', target: document.querySelectorAll('.sidebar-panel')[1], side: 'left' }
+            const targets = [
+                document.getElementById('c1-bust-upload-zone'),
+                document.querySelector('#char-col-2 .desc-list-wrapper'),
+                document.getElementById('c3-speech-bubble-layer'),
+                document.querySelectorAll('.sidebar-panel')[1]
             ];
 
-            configs.forEach(cfg => {
-                const box = document.getElementById(cfg.boxId);
-                const arrow = document.getElementById(cfg.arrowId);
-                const label = document.getElementById(cfg.labelId);
-                const rect = cfg.target ? cfg.target.getBoundingClientRect() : null;
+            targets.forEach((el, i) => {
+                const box = document.getElementById('hud-box-' + (i + 1));
+                const num = document.getElementById('hud-num-' + (i + 1));
+                const r = el ? el.getBoundingClientRect() : null;
+                const hidden = !r || r.width === 0 || r.height === 0 ||
+                               (el && getComputedStyle(el).opacity === '0') ||
+                               r.bottom < 0 || r.top > window.innerHeight;
 
-                if (!rect || rect.width === 0 || rect.height === 0) {
-                    box.style.display = 'none'; arrow.style.display = 'none'; label.style.display = 'none';
-                    return;
-                }
-                box.style.display = 'block'; arrow.style.display = 'block'; label.style.display = 'block';
+                if (hidden) { box.style.display = 'none'; num.style.display = 'none'; return; }
 
-                box.style.left = (rect.left - 4) + 'px';
-                box.style.top = (rect.top - 4) + 'px';
-                box.style.width = (rect.width + 8) + 'px';
-                box.style.height = (rect.height + 8) + 'px';
+                box.style.display = 'block'; num.style.display = 'flex';
+                box.style.left = (r.left - 4) + 'px';
+                box.style.top = (r.top - 4) + 'px';
+                box.style.width = (r.width + 8) + 'px';
+                box.style.height = (r.height + 8) + 'px';
 
-                const labelWidth = 320;
-                const labelHeight = label.offsetHeight || 150;
-                const gap = 46;
-                let startX = 0, startY = 0, endX = 0, labelLeft = 0, labelTop = 0;
-
-                if (cfg.side === 'right') {
-                    startX = rect.right; startY = rect.top + rect.height / 2; endX = startX + gap;
-                    labelLeft = endX + 8;
-                    labelTop = clampNum(startY - labelHeight / 2, 16, vh - labelHeight - 16);
-                    if (labelLeft + labelWidth > vw - 16) {
-                        labelLeft = clampNum(rect.left, 16, vw - labelWidth - 16);
-                        labelTop = clampNum(rect.bottom + 16, 16, vh - labelHeight - 16);
-                        arrow.style.display = 'none';
-                    }
-                } else {
-                    startX = rect.left; startY = rect.top + rect.height / 2; endX = startX - gap;
-                    labelLeft = endX - labelWidth - 8;
-                    labelTop = clampNum(startY - labelHeight / 2, 16, vh - labelHeight - 16);
-                    if (labelLeft < 16) {
-                        labelLeft = clampNum(rect.left, 16, vw - labelWidth - 16);
-                        labelTop = clampNum(rect.top - labelHeight - 16, 16, vh - labelHeight - 16);
-                        arrow.style.display = 'none';
-                    }
-                }
-
-                label.style.left = labelLeft + 'px';
-                label.style.top = labelTop + 'px';
-
-                if (arrow.style.display !== 'none') {
-                    const length = Math.abs(endX - startX);
-                    arrow.style.width = length + 'px';
-                    arrow.style.left = Math.min(startX, endX) + 'px';
-                    arrow.style.top = startY + 'px';
-                    arrow.style.transform = (endX < startX) ? 'scaleX(-1)' : 'none';
-                }
+                num.style.left = clampNum(r.left - 13, 4, window.innerWidth - 30) + 'px';
+                num.style.top = clampNum(r.top - 13, 4, window.innerHeight - 30) + 'px';
             });
         }
 
@@ -1505,7 +1476,7 @@
         }
 
         function changeMainFontFamily(fontType) {
-            document.documentElement.style.setProperty('--main-font', fontType === 'serif' ? "'BonmyeongjoSourceHanSerif', 'Noto Serif KR', serif" : "'Noto Sans KR', sans-serif");
+            document.documentElement.style.setProperty('--main-font', fontType === 'serif' ? "'BonmyeongjoSourceHanSerif', 'Noto Serif KR', 'Noto Serif JP', serif" : "'Noto Sans KR', 'Noto Sans JP', sans-serif");
             triggerAutoSave();
         }
 
@@ -1962,6 +1933,7 @@
         }
 
         window.addEventListener('resize', autoResponsiveScale);
+        window.addEventListener('scroll', () => { if (document.getElementById('canvas-help-overlay').classList.contains('active')) positionHudGuide(); }, true);
         window.addEventListener('DOMContentLoaded', loadDataFromDB);
     </script>
 </body>
