@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>다인원 반신 커미션 폼 (HUD 가이드 업데이트)</title>
+    <title>다인원 반신 커미션 폼</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@400;500;700;900&family=Noto+Sans+JP:wght@100..900&family=Noto+Serif+JP:wght@200..900&display=swap" rel="stylesheet">
@@ -251,6 +251,85 @@
         
         #toast-notification { position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); background: #10b981; color: white; padding: 10px 20px; border-radius: 8px; font-size: 12px; font-weight: 700; opacity: 0; transition: opacity 0.3s; z-index: 10000; pointer-events: none; display: flex; align-items: center; gap: 6px; }
 
+
+
+        /* ===== 접이식 섹션 ===== */
+        .collapsible-head { cursor: pointer; user-select: none; }
+        .collapsible-head .fold-arrow { margin-left: auto; color: #94a3b8; transition: transform .2s ease; flex-shrink: 0; display: inline-flex; }
+        .collapsible-head .fold-arrow svg { width: 13px; height: 13px; }
+        .collapsed .fold-arrow { transform: rotate(-90deg); }
+        .collapsible-body { display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
+        .collapsed > .collapsible-body { display: none; }
+        .collapsible-head { display: flex; align-items: center; gap: 6px; }
+        .section-fold.collapsed { padding-bottom: 10px; }
+
+
+
+
+        /* 팔레트 색 이름 · 순서 바꾸기 */
+        .color-item { cursor: grab; }
+        .color-item.dragging { opacity: .45; }
+        .color-item.drop-target { outline: 2px dashed var(--primary-color); outline-offset: 2px; border-radius: 6px; }
+        .color-label-input { width: 100%; font-size: 9px; font-weight: 700; text-align: center; border: none;
+                             outline: none; background: transparent; color: #0f172a; padding: 0; margin-top: 1px; }
+        .color-label-input::placeholder { color: #cbd5e1; font-weight: 500; }
+        .hide-on-save .color-label-input::placeholder { color: transparent; }
+
+        /* 한글 버튼 글자가 단어 중간에서 끊기지 않도록 (예: '슬롯 불러오/기') */
+        .mini-btn, .undo-btn, .seg-label, .font-select-label, .char-select-label,
+        .line-select-label, .icon-select-label, .save-btn, .add-palette-btn,
+        .sticker-btn-label, .guide-open-btn, .reset-btn, .bulk-color-btn, .kw-add-btn {
+            word-break: keep-all; overflow-wrap: normal; white-space: nowrap;
+            font-size: 10.5px; letter-spacing: -0.3px; padding-left: 6px; padding-right: 6px;
+        }
+        .sidebar-panel { word-break: keep-all; }
+        .mini-btn { min-height: 32px; overflow: hidden; text-overflow: ellipsis; }
+        /* 말풍선 묶음 안 소제목 */
+        .bubble-sub-label { font-size: 10px !important; color: #64748b !important; font-weight: 700; margin-top: 2px; }
+
+        /* ===== 패널 잘림 / 간격 벌어짐 방지 =====
+           height:100% 때문에 내용이 눌려 잘리고, margin-top:auto 버튼들이
+           남는 공간을 나눠 가지며 간격이 벌어지던 문제를 바로잡습니다. */
+        .btn-group-vertical { height: auto !important; justify-content: flex-start !important; }
+        .sidebar-panel > *, .btn-group-vertical > * { flex-shrink: 0; }
+        .section-fold { flex-shrink: 0 !important; }
+        .guide-open-btn, .reset-btn { margin-top: 0 !important; }
+        .btn-group-vertical > .reset-btn { margin-top: 4px !important; }
+        .sidebar-panel { height: auto !important; max-height: calc(100vh - 40px) !important;
+                         overflow-y: auto !important; padding-bottom: 22px !important; }
+        @media (max-width: 1200px) {
+            .sidebar-panel { max-height: none !important; overflow-y: visible !important; }
+        }
+
+        /* ===== 접이식 섹션 공통 외형 (세 폼 동일하게 보이도록 통일) ===== */
+        .section-fold { background: #ffffff !important; border: 1px solid #e2e8f0 !important;
+                        border-radius: 12px !important; padding: 0 !important; overflow: hidden;
+                        gap: 0 !important; box-shadow: 0 1px 2px rgba(15,23,42,0.03); transition: border-color .15s; }
+        .section-fold:hover { border-color: #cbd5e1 !important; }
+        .section-fold > .collapsible-head { padding: 13px 14px !important; margin: 0 !important;
+                        font-size: 11.5px; font-weight: 700; color: #334155; background: #ffffff;
+                        display: flex; align-items: center; gap: 8px; }
+        .section-fold > .collapsible-head .ui-icon { width: 14px; height: 14px; stroke: #64748b; }
+        .section-fold:not(.collapsed) > .collapsible-head { border-bottom: 1px solid #f1f5f9; }
+        .section-fold > .collapsible-body { padding: 12px 14px 14px !important; gap: 8px; }
+        .section-fold.collapsed { padding-bottom: 0 !important; }
+        .section-fold .fold-arrow { color: #cbd5e1; }
+        .section-fold .fold-arrow svg { width: 14px; height: 14px; }
+        /* 묶음 안의 소제목 */
+        .section-fold .collapsible-body .sidebar-title-left { font-size: 10px; color: #64748b; font-weight: 700; }
+
+        .mini-toast { position: fixed; bottom: 78px; left: 50%; transform: translateX(-50%) translateY(8px); background: #0f172a; color: #fff; padding: 9px 18px; border-radius: 20px; font-size: 12px; font-weight: 700; z-index: 300000; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; }
+        .mini-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .undo-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        .undo-btn { display: flex; align-items: center; justify-content: center; gap: 5px; padding: 9px; border-radius: 9px; border: 1px solid #cbd5e1; background: #fff; color: #334155; font-size: 11px; font-weight: 700; cursor: pointer; transition: all .15s; }
+        .undo-btn:hover:not(:disabled) { background: #f1f5f9; border-color: #94a3b8; }
+        .undo-btn:disabled { cursor: default; }
+        .slot-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        .slot-select { width: 100%; padding: 7px 8px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 11px; font-weight: 700; color: #334155; background: #fff; outline: none; cursor: pointer; }
+        .mini-btn { display: flex; align-items: center; justify-content: center; gap: 5px; padding: 8px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; color: #334155; font-size: 11px; font-weight: 700; cursor: pointer; }
+        .mini-btn:hover { background: #f1f5f9; }
+        .bg-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; font-size: 10px; font-weight: 700; color: #64748b; }
+        .swatch { width: 30px; height: 18px; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer; padding: 0; background: none; }
         .context-menu { position: absolute; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; z-index: 100000; overflow: hidden; width: 155px; display: none; padding: 4px; }
         .context-menu-item { padding: 8px 12px; font-size: 11px; font-weight: 700; color: #334155; cursor: pointer; display: flex; align-items: center; gap: 8px; border-radius: 4px; }
         .context-menu-item:hover { background: #f1f5f9; color: #0f172a; }
@@ -353,7 +432,7 @@
                 </div>
                 <div style="font-size: 10px; color: #15803d; margin-top: 2px; display: flex; gap: 4px; line-height: 1.4;">
                     <svg class="ui-icon" style="width: 12px; height: 12px; stroke: #15803d;"><use href="#icon-bulb"/></svg> 
-                    <span>기능을 켜면 선택한 캔버스만 집중적으로 편집할 수 있습니다. 끄면 원래 자리로 돌아갑니다.</span>
+                    <span>선택한 캔버스만 크게 편집 · 끄면 원래대로</span>
                 </div>
             </div>
 
@@ -366,6 +445,19 @@
                     <label class="char-select-label" id="lbl-char-4"><input type="radio" name="target-char-choice" value="4" onchange="switchTargetCharacter(this.value)">4번</label>
                     <label class="char-select-label" id="lbl-char-5"><input type="radio" name="target-char-choice" value="5" onchange="switchTargetCharacter(this.value)">5번</label>
                 </div>
+                <div class="sidebar-title" style="margin-top:6px;"><span class="sidebar-title-left"><svg class="ui-icon"><use href="#icon-clipboard"/></svg> 캐릭터 정보 복사 / 맞바꾸기</span></div>
+                <div class="bg-row"><span>대상 캐릭터</span>
+                    <select class="slot-select" id="char-op-target" style="width:96px;"></select>
+                </div>
+                <div class="slot-row">
+                    <button class="mini-btn" onclick="copyCharacterInfo()">정보 복사</button>
+                    <button class="mini-btn" onclick="swapCharacters()">맞바꾸기</button>
+                </div>
+                <div style="font-size:10px;color:#64748b;line-height:1.5;display:flex;gap:4px;">
+                    <svg class="ui-icon" style="width:12px;height:12px;"><use href="#icon-bulb"/></svg>
+                    <span><b>복사</b>는 그림 빼고 덮어쓰기 · <b>맞바꾸기</b>는 그림까지 교체</span>
+                </div>
+
             </div>
 
             <div class="sidebar-section">
@@ -624,35 +716,92 @@
                     </label>
                 </div>
                 
-                <!-- 하단 여백 조절 슬라이더 -->
-                <div class="font-size-control-vertical" style="background: #e0f2fe; border-color: #bae6fd;">
-                    <div class="sidebar-title-left"><svg class="ui-icon"><use href="#icon-arrow-v"/></svg> 캔버스 하단 여백 조절</div>
+                <!-- 캔버스·서체 관련 설정 묶음 -->
+                <div class="font-size-control-vertical">
+                    <div class="sidebar-title-left"><svg class="ui-icon"><use href="#icon-arrow-v"/></svg> 캔버스 · 서체 설정</div>
+                    <div class="sidebar-title-left" style="font-size:10px;color:#64748b;">캔버스 하단 여백</div>
                     <div class="slider-row">
                         <input type="range" id="height-slider" min="0" max="800" value="0" step="20" oninput="changeCanvasHeight(this.value)">
                         <span id="height-val">0px</span>
                     </div>
-                </div>
-
-                <label class="sticker-btn-label"><svg class="ui-icon"><use href="#icon-sparkle"/></svg> 스티커/데코 추가 선택<input type="file" accept="image/*" style="display:none;" onchange="createNewSticker(event)"></label>
-                <button class="add-palette-btn" onclick="addNewPaletteItem()"><svg class="ui-icon"><use href="#icon-palette"/></svg> 컬러 팔레트 추가</button>
-                <button class="add-palette-btn" style="background: #0f172a;" onclick="addSingleSpecCardSlot()"><svg class="ui-icon"><use href="#icon-clipboard"/></svg> 프로필 박스 추가</button>
-                
-                <div class="font-size-control-vertical" style="margin-top: 2px;">
-                    <div class="sidebar-title-left"><svg class="ui-icon"><use href="#icon-font"/></svg> 서체 종류 선택</div>
+                    <div class="sidebar-title-left" style="font-size:10px;color:#64748b;">서체 종류</div>
                     <div class="font-select-box">
                         <label class="font-select-label"><input type="radio" name="font-style-choice" value="sans" checked onchange="changeMainFontFamily(this.value)">고딕체</label>
                         <label class="font-select-label"><input type="radio" name="font-style-choice" value="serif" onchange="changeMainFontFamily(this.value)">명조체</label>
                     </div>
-                </div>
-
-                <div class="font-size-control-vertical">
-                    <div class="sidebar-title-left">설명란 글씨 크기</div>
+                    <div class="sidebar-title-left" style="font-size:10px;color:#64748b;">설명란 글씨 크기</div>
                     <div class="slider-row">
                         <input type="range" id="font-slider" min="10" max="24" value="12" oninput="changeDescFontSize(this.value)">
                         <span id="font-val">12px</span>
                     </div>
                 </div>
 
+
+                <div class="undo-row">
+                    <button class="undo-btn" id="undo-btn" onclick="doUndo()" disabled><svg class="ui-icon"><use href="#icon-rotate"/></svg> 되돌리기</button>
+                    <button class="undo-btn" id="redo-btn" onclick="doRedo()" disabled><svg class="ui-icon" style="transform:scaleX(-1);"><use href="#icon-rotate"/></svg> 다시 실행</button>
+                </div>
+
+                <div class="font-size-control-vertical">
+                    <div class="sidebar-title-left"><svg class="ui-icon"><use href="#icon-clipboard"/></svg> 저장 슬롯 / 백업</div>
+                    <select class="slot-select" id="slot-select">
+                        <option value="1">슬롯 1</option>
+                        <option value="2">슬롯 2</option>
+                        <option value="3">슬롯 3</option>
+                        <option value="4">슬롯 4</option>
+                        <option value="5">슬롯 5</option>
+                    </select>
+                    <div class="slot-row">
+                        <button class="mini-btn" onclick="saveToSlot()">슬롯 저장</button>
+                        <button class="mini-btn" onclick="loadFromSlot()">슬롯 불러오기</button>
+                    </div>
+                    <div class="slot-row">
+                        <button class="mini-btn" onclick="exportStateToFile()">파일 내보내기</button>
+                        <label class="mini-btn" style="margin:0;">파일 불러오기<input type="file" accept="application/json,.json" style="display:none;" onchange="importStateFromFile(event)"></label>
+                    </div>
+                </div>
+
+                <div class="font-size-control-vertical">
+                    <div class="sidebar-title-left"><svg class="ui-icon"><use href="#icon-palette"/></svg> 이미지에서 색 추출</div>
+                    <div class="bg-row">
+                        <span>추출 개수</span>
+                        <select class="slot-select" id="extract-count" style="width:64px;">
+                            <option>3</option><option selected>5</option><option>7</option><option>9</option>
+                        </select>
+                    </div>
+                    <label class="bg-row" style="cursor:pointer;">
+                        <span>기존 팔레트 대체</span>
+                        <input type="checkbox" id="extract-replace" checked style="accent-color:#0f172a;">
+                    </label>
+                    <button class="mini-btn" onclick="extractPaletteFromImage()"><svg class="ui-icon"><use href="#icon-sparkle"/></svg> 선택 캐릭터 이미지에서 추출</button>
+                </div>
+
+                <div class="font-size-control-vertical">
+                    <div class="sidebar-title-left"><svg class="ui-icon"><use href="#icon-image"/></svg> 캔버스 배경</div>
+                    <div class="font-select-box">
+                        <label class="font-select-label"><input type="radio" name="bg-mode" value="solid" checked onchange="applyCanvasBackground()">단색</label>
+                        <label class="font-select-label"><input type="radio" name="bg-mode" value="gradient" onchange="applyCanvasBackground()">그라데이션</label>
+                    </div>
+                    <div class="bg-row">
+                        <span>기본 색</span>
+                        <input type="color" class="swatch" id="bg-color-1" value="#ffffff" oninput="applyCanvasBackground()">
+                    </div>
+                    <div class="bg-row" id="bg-gradient-row" style="display:none;">
+                        <span>끝 색 / 각도</span>
+                        <span style="display:flex;align-items:center;gap:6px;">
+                            <input type="color" class="swatch" id="bg-color-2" value="#e0f2fe" oninput="applyCanvasBackground()">
+                            <span id="bg-angle-val" style="min-width:34px;text-align:right;color:#0f172a;">135°</span>
+                        </span>
+                    </div>
+                    <input type="range" id="bg-angle" min="0" max="360" value="135" step="5" oninput="applyCanvasBackground()" style="width:100%;accent-color:#0f172a;height:4px;">
+                    <div class="bg-row"><span>첫 색 비중</span><span id="bg-ratio-val" style="color:#0f172a;">0%</span></div>
+                    <input type="range" id="bg-ratio" min="0" max="90" value="0" step="5" oninput="applyCanvasBackground()" style="width:100%;accent-color:#0f172a;height:4px;">
+                </div>
+
+                <label class="sticker-btn-label"><svg class="ui-icon"><use href="#icon-sparkle"/></svg> 스티커/데코 추가 선택<input type="file" accept="image/*" style="display:none;" onchange="createNewSticker(event)"></label>
+                <button class="add-palette-btn" onclick="addNewPaletteItem()"><svg class="ui-icon"><use href="#icon-palette"/></svg> 컬러 팔레트 추가</button>
+                <button class="add-palette-btn" style="background: #0f172a;" onclick="addSingleSpecCardSlot()"><svg class="ui-icon"><use href="#icon-clipboard"/></svg> 프로필 박스 추가</button>
+                
                 <button class="save-btn png-theme" style="margin-top: 10px;" onclick="saveTemplateAsImage('png')">
                     <svg class="ui-icon"><use href="#icon-image"/></svg> PNG 고화질 저장 (병합)
                 </button>
@@ -740,6 +889,9 @@
                 <div class="manual-section">
                     <h3>1. 캐릭터 인원수 & 편집 대상</h3>
                     <ul>
+                        <li><b>캐릭터 정보 복사</b> — 대상 캐릭터를 고르고 누르면 이름·프로필·팔레트·설명·키워드가 복사됩니다. 그림은 대상의 것이 그대로 남습니다.</li>
+                        <li><b>맞바꾸기</b> — 두 캐릭터의 내용을 그림까지 통째로 바꿉니다. 배치 순서를 바꾸고 싶을 때 편합니다.</li>
+                        <li>둘 다 되돌리기(Ctrl+Z)로 되돌릴 수 있습니다.</li>
                         <li>좌측 <b>'캔버스 인원수 설정'</b>에서 2~5인 중 필요한 인원 수를 고릅니다.</li>
                         <li><b>'편집 중인 캐릭터'</b>에서 번호를 누르거나, 캔버스에서 원하는 칸을 직접 클릭하면 그 캐릭터가 편집 대상으로 지정됩니다.</li>
                         <li><b>'개별 집중 편집 모드'</b>를 켜면 선택한 캐릭터 한 명만 크게 확대해서 편집할 수 있습니다. 끄면 원래 배치로 돌아갑니다.</li>
@@ -778,6 +930,8 @@
                         <li>이름과 영문/한자 표기는 캔버스에서 직접 클릭해 입력합니다.</li>
                         <li>성별·나이·신장 등의 <b>프로필 박스</b>는 우측 패널 <b>'프로필 박스 추가'</b>로 늘릴 수 있습니다(캐릭터당 최대 6개).</li>
                         <li><b>컬러 팔레트</b>는 우측 패널 <b>'컬러 팔레트 추가'</b>로 늘릴 수 있고, 각 칸을 클릭해 색을 고르거나 코드로 직접 입력할 수 있습니다.</li>
+                        <li>각 색 칸 아래 <b>이름</b>을 적을 수 있습니다(머리카락 · 눈동자 등). 비워 두면 저장 이미지에도 나오지 않습니다.</li>
+                        <li>색 칸을 <b>드래그</b>하면 순서를 바꿀 수 있습니다.</li>
                     </ul>
                 </div>
                 <div class="manual-section">
@@ -1035,6 +1189,7 @@
             }
             
             document.getElementById('char-btn-grid').style.gridTemplateColumns = `repeat(${count}, 1fr)`;
+            refreshCharOpTarget();
             if (parseInt(currentTargetChar) > count) handleColClick('1');
 
             triggerAutoSave();
@@ -1077,6 +1232,71 @@
             switchTargetCharacter(charNum);
         }
 
+
+        /* ===== 캐릭터 정보 복사 / 맞바꾸기 ===== */
+        function charCount() {
+            const r = document.querySelector('input[name="member-count-choice"]:checked');
+            return r ? parseInt(r.value) : 2;
+        }
+
+        function refreshCharOpTarget() {
+            const sel = document.getElementById('char-op-target');
+            if (!sel) return;
+            const n = charCount();
+            const prev = sel.value;
+            sel.innerHTML = '';
+            for (let i = 1; i <= n; i++) {
+                if (String(i) === String(currentTargetChar)) continue;
+                const o = document.createElement('option');
+                o.value = i; o.textContent = i + '번';
+                sel.appendChild(o);
+            }
+            if (prev && sel.querySelector('option[value="' + prev + '"]')) sel.value = prev;
+        }
+
+        function copyCharacterInfo() {
+            const src = String(currentTargetChar);
+            const dst = document.getElementById('char-op-target').value;
+            if (!dst || src === dst) { alert('서로 다른 캐릭터를 골라 주세요.'); return; }
+            if (!confirm(src + '번의 정보를 ' + dst + '번에 덮어씁니다. 그림은 그대로 두고 나머지만 복사합니다. 진행할까요?')) return;
+
+            const s = collectState();
+            const copied = JSON.parse(JSON.stringify(s['char_' + src]));
+            // 그림과 말풍선 위치는 대상의 것을 그대로 둡니다.
+            copied.image = s['char_' + dst].image;
+            if (s['char_' + dst].bubblePos) copied.bubblePos = s['char_' + dst].bubblePos;
+            if (s['char_' + dst].stickers) copied.stickers = s['char_' + dst].stickers;
+            s['char_' + dst] = copied;
+            if (s.charSettings) s.charSettings['char_' + dst] = JSON.parse(JSON.stringify(s.charSettings['char_' + src]));
+
+            applyState(s);
+            lastSnapshot = collectState();
+            triggerAutoSave();
+            showToast(src + '번 정보를 ' + dst + '번에 복사했습니다');
+        }
+
+        function swapCharacters() {
+            const a = String(currentTargetChar);
+            const b = document.getElementById('char-op-target').value;
+            if (!b || a === b) { alert('서로 다른 캐릭터를 골라 주세요.'); return; }
+            if (!confirm(a + '번과 ' + b + '번의 내용을 그림까지 통째로 맞바꿉니다. 진행할까요?')) return;
+
+            const s = collectState();
+            const tmp = s['char_' + a];
+            s['char_' + a] = s['char_' + b];
+            s['char_' + b] = tmp;
+            if (s.charSettings) {
+                const t2 = s.charSettings['char_' + a];
+                s.charSettings['char_' + a] = s.charSettings['char_' + b];
+                s.charSettings['char_' + b] = t2;
+            }
+
+            applyState(s);
+            lastSnapshot = collectState();
+            triggerAutoSave();
+            showToast(a + '번과 ' + b + '번을 맞바꿨습니다');
+        }
+
         function switchTargetCharacter(charNum) {
             currentTargetChar = charNum;
             document.querySelectorAll('.character-column').forEach(col => col.classList.remove('active-target'));
@@ -1100,7 +1320,452 @@
             });
 
             updateColumnVisibility();
+            refreshCharOpTarget();
         }
+
+
+
+        /* ===================== 사이드바 UX: 접이식 섹션 · 버튼 순서 =====================
+           마크업이 폼마다 조금씩 달라, 제목 텍스트로 섹션을 찾아 공통 처리합니다. */
+        const FOLD_TITLES = ['성격 키워드', '저장 슬롯 / 백업', '이미지에서 색 추출', '캔버스 배경',
+                             '한마디 말풍선', '캔버스 · 서체 설정'];
+        const FOLD_KEY = 'fold_state_' + (document.title || 'form');
+
+        function loadFoldState() {
+            try { return JSON.parse(localStorage.getItem(FOLD_KEY)) || {}; } catch (e) { return {}; }
+        }
+        function saveFoldState(st) {
+            try { localStorage.setItem(FOLD_KEY, JSON.stringify(st)); } catch (e) {}
+        }
+
+        function setupCollapsibleSections() {
+            const state = loadFoldState();
+
+            FOLD_TITLES.forEach(title => {
+                // 제목 요소를 찾습니다 (.sidebar-title 또는 .sidebar-title-left)
+                const heads = Array.from(document.querySelectorAll('.sidebar-title, .sidebar-title-left'));
+                const head = heads.find(h => h.textContent.trim().startsWith(title) && !h.dataset.foldReady);
+                if (!head) return;
+
+                // 제목이 .sidebar-title-left 이고 그 부모가 .sidebar-title 이면 부모를 헤더로 씁니다.
+                let headerEl = head;
+                if (head.classList.contains('sidebar-title-left') && head.parentElement &&
+                    head.parentElement.classList.contains('sidebar-title')) {
+                    headerEl = head.parentElement;
+                }
+                const section = headerEl.parentElement;
+                if (!section) return;
+
+                headerEl.dataset.foldReady = '1';
+                head.dataset.foldReady = '1';
+
+                // 헤더 뒤의 형제들을 본문으로 묶습니다.
+                const body = document.createElement('div');
+                body.className = 'collapsible-body';
+                let node = headerEl.nextSibling;
+                while (node) {
+                    const next = node.nextSibling;
+                    body.appendChild(node);
+                    node = next;
+                }
+                if (!body.childNodes.length) return;
+                section.appendChild(body);
+
+                section.classList.add('section-fold');
+                headerEl.classList.add('collapsible-head');
+
+                const arrow = document.createElement('span');
+                arrow.className = 'fold-arrow';
+                arrow.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>';
+                headerEl.appendChild(arrow);
+
+                // 기본값은 접힘 (필요할 때만 펼쳐 쓰도록)
+                const open = state[title] === true;
+                if (!open) section.classList.add('collapsed');
+
+                headerEl.addEventListener('click', e => {
+                    // 토글 스위치·색상 선택 등은 접기 동작과 분리합니다.
+                    if (e.target.closest('input, label, select, button')) return;
+                    section.classList.toggle('collapsed');
+                    const st = loadFoldState();
+                    st[title] = !section.classList.contains('collapsed');
+                    saveFoldState(st);
+                });
+            });
+        }
+
+        function reorderUtilityButtons() {
+            const stickerInput = document.querySelector('input[onchange*="createNewSticker"]');
+            const stickerLabel = stickerInput ? stickerInput.closest('label') : null;
+            const paletteBtn = document.querySelector('button[onclick*="addNewPaletteItem"]');
+            const specBtn = document.querySelector('button[onclick*="addSpecBoxSlot"], button[onclick*="addSingleSpecCardSlot"]');
+            if (!stickerLabel) return;
+            const container = stickerLabel.parentElement;
+            if (!container) return;
+            // 자주 쓰는 추가 버튼 3종을 패널 맨 위로 올립니다.
+            if (specBtn) container.prepend(specBtn);
+            if (paletteBtn) container.prepend(paletteBtn);
+            container.prepend(stickerLabel);
+        }
+
+
+        // 세 폼의 패널 순서를 동일하게 맞춥니다 (시리즈로 느껴지도록).
+        const SECTION_ORDER = ['캔버스 · 서체 설정', '캔버스 배경', '이미지에서 색 추출', '저장 슬롯 / 백업'];
+
+        function reorderUtilitySections() {
+            const stickerInput = document.querySelector('input[onchange*="createNewSticker"]');
+            const stickerLabel = stickerInput ? stickerInput.closest('label') : null;
+            if (!stickerLabel) return;
+            const container = stickerLabel.parentElement;
+            if (!container) return;
+
+            // 저장/도움말 버튼 중 첫 번째를 기준점으로 삼아 그 앞에 순서대로 끼워 넣습니다.
+            const anchor = container.querySelector('button[onclick*="saveTemplateAsImage"]');
+
+            const pick = title => Array.from(container.querySelectorAll('.section-fold'))
+                .find(sec => {
+                    const h = sec.querySelector('.collapsible-head');
+                    return h && h.textContent.trim().startsWith(title);
+                });
+
+            // 자석 스냅 · 되돌리기 줄을 추가 버튼 바로 아래로
+            const snap = container.querySelector('.snap-toggle-row');
+            const undo = container.querySelector('.undo-row');
+            const tip = container.querySelector('.sticker-tip');
+            const head = [tip, undo, snap].filter(Boolean);
+            let after = stickerLabel;
+            const specBtn = container.querySelector('button[onclick*="addSpecBoxSlot"], button[onclick*="addSingleSpecCardSlot"]');
+            if (specBtn) after = specBtn;
+            head.forEach(el => { after.after(el); after = el; });
+
+            SECTION_ORDER.forEach(title => {
+                const sec = pick(title);
+                if (!sec) return;
+                if (anchor) container.insertBefore(sec, anchor);
+                else container.appendChild(sec);
+            });
+        }
+
+
+        // '말풍선 정렬 방식' · '말풍선 아이콘 종류' 를 '한마디 말풍선' 안으로 합칩니다.
+        // (폼마다 마크업이 조금씩 달라 제목으로 찾아 옮깁니다)
+        function mergeBubbleSections() {
+            const findSection = title => {
+                const head = Array.from(document.querySelectorAll('.sidebar-title, .sidebar-title-left'))
+                    .find(h => h.textContent.trim().startsWith(title));
+                if (!head) return null;
+                const headerEl = (head.classList.contains('sidebar-title-left') && head.parentElement
+                                  && head.parentElement.classList.contains('sidebar-title'))
+                                 ? head.parentElement : head;
+                return { headerEl, section: headerEl.parentElement };
+            };
+
+            const target = findSection('한마디 말풍선');
+            if (!target) return;
+
+            ['말풍선 정렬 방식', '말풍선 아이콘 종류'].forEach(title => {
+                const found = findSection(title);
+                if (!found || found.section === target.section) return;
+
+                // 소제목으로 바꿔 붙인 뒤 내용만 옮깁니다.
+                const label = document.createElement('span');
+                label.className = 'sidebar-title-left bubble-sub-label';
+                label.textContent = title.replace('말풍선 ', '');
+                target.section.appendChild(label);
+
+                Array.from(found.section.children).forEach(child => {
+                    if (child === found.headerEl) return;
+                    target.section.appendChild(child);
+                });
+                found.section.remove();
+            });
+        }
+
+        function setupSidebarUX() {
+            mergeBubbleSections();
+            reorderUtilityButtons();
+            setupCollapsibleSections();
+            reorderUtilitySections();
+        }
+
+        /* ===================== 되돌리기 / 다시 실행 ===================== */
+        let undoStack = [], redoStack = [], lastSnapshot = null;
+        const UNDO_LIMIT = 30;
+
+        function pushUndoSnapshot(current) {
+            if (lastSnapshot) {
+                const prev = JSON.stringify(lastSnapshot);
+                if (prev !== JSON.stringify(current)) {
+                    undoStack.push(prev);
+                    if (undoStack.length > UNDO_LIMIT) undoStack.shift();
+                    redoStack = [];
+                }
+            }
+            lastSnapshot = current;
+            updateUndoButtons();
+        }
+
+        function updateUndoButtons() {
+            const u = document.getElementById('undo-btn'), r = document.getElementById('redo-btn');
+            if (u) { u.disabled = undoStack.length === 0; u.style.opacity = undoStack.length ? '1' : '.4'; }
+            if (r) { r.disabled = redoStack.length === 0; r.style.opacity = redoStack.length ? '1' : '.4'; }
+        }
+
+        function doUndo() {
+            if (!undoStack.length) return;
+            const cur = JSON.stringify(collectState());
+            const prev = JSON.parse(undoStack.pop());
+            redoStack.push(cur);
+            applyState(prev);
+            lastSnapshot = prev;
+            dbHelper.save('commission_v9_data', prev);
+            updateUndoButtons();
+            showToast('되돌렸습니다');
+        }
+
+        function doRedo() {
+            if (!redoStack.length) return;
+            const cur = JSON.stringify(collectState());
+            const next = JSON.parse(redoStack.pop());
+            undoStack.push(cur);
+            applyState(next);
+            lastSnapshot = next;
+            dbHelper.save('commission_v9_data', next);
+            updateUndoButtons();
+            showToast('다시 실행했습니다');
+        }
+
+        /* ===================== 저장 슬롯 · 백업 ===================== */
+        function currentSlotKey() {
+            return 'commission_v9_data' + '_slot' + (document.getElementById('slot-select').value || '1');
+        }
+
+        async function saveToSlot() {
+            const n = document.getElementById('slot-select').value;
+            await dbHelper.save(currentSlotKey(), collectState());
+            showToast('슬롯 ' + n + '에 저장했습니다');
+        }
+
+        async function loadFromSlot() {
+            const n = document.getElementById('slot-select').value;
+            const data = await dbHelper.load(currentSlotKey());
+            if (!data) { alert('슬롯 ' + n + '에 저장된 내용이 없습니다.'); return; }
+            if (!confirm('슬롯 ' + n + '의 내용을 불러옵니다. 현재 작업은 덮어써집니다. 진행할까요?')) return;
+            applyState(data);
+            lastSnapshot = collectState();
+            triggerAutoSave();
+            showToast('슬롯 ' + n + '을 불러왔습니다');
+        }
+
+        function exportStateToFile() {
+            const blob = new Blob([JSON.stringify(collectState(), null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = (document.getElementById('c1-input-name').value || 'group') + '_다인틀' + '_백업.json';
+            a.click();
+            setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+            showToast('백업 파일을 내려받았습니다');
+        }
+
+        function importStateFromFile(event) {
+            const f = event.target.files[0];
+            if (!f) return;
+            const fr = new FileReader();
+            fr.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (!confirm('불러온 파일로 현재 작업을 덮어씁니다. 진행할까요?')) return;
+                    applyState(data);
+                    lastSnapshot = collectState();
+                    triggerAutoSave();
+                    showToast('백업 파일을 불러왔습니다');
+                } catch (err) {
+                    alert('파일을 읽을 수 없습니다. 이 도구에서 내보낸 JSON 파일인지 확인해 주세요.');
+                }
+            };
+            fr.readAsText(f);
+            event.target.value = '';
+        }
+
+        function showToast(msg) {
+            let t = document.getElementById('mini-toast');
+            if (!t) { t = document.createElement('div'); t.id = 'mini-toast'; document.body.appendChild(t); }
+            t.textContent = msg;
+            t.className = 'mini-toast show';
+            clearTimeout(t._timer);
+            t._timer = setTimeout(() => { t.className = 'mini-toast'; }, 1800);
+        }
+
+        /* ===================== 이미지에서 색 추출 ===================== */
+        function extractPaletteFromImage() {
+            const img = (function(){const z=document.getElementById('c'+currentTargetChar+'-bust-upload-zone');return z?z.querySelector('img'):null;})();
+            if (!img || !img.src) { alert('먼저 이미지를 업로드해 주세요.'); return; }
+
+            const n = parseInt(document.getElementById('extract-count').value) || 5;
+            const cv = document.createElement('canvas');
+            const W = 120, ratio = img.naturalHeight / img.naturalWidth || 1;
+            cv.width = W; cv.height = Math.max(1, Math.round(W * ratio));
+            const ctx = cv.getContext('2d');
+            try { ctx.drawImage(img, 0, 0, cv.width, cv.height); } catch (e) { alert('이미지를 읽을 수 없습니다.'); return; }
+
+            let px;
+            try { px = ctx.getImageData(0, 0, cv.width, cv.height).data; } catch (e) { alert('이미지를 읽을 수 없습니다.'); return; }
+
+            // 색 공간을 거칠게 나눠 가장 많이 쓰인 칸을 고릅니다.
+            const bins = {};
+            for (let i = 0; i < px.length; i += 4) {
+                if (px[i + 3] < 125) continue;
+                const r = px[i], g = px[i + 1], b = px[i + 2];
+                const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+                const weight = (mx > 245 && mn > 245) || (mx < 12) ? 0.15 : 1;
+                const key = (r >> 4) + ',' + (g >> 4) + ',' + (b >> 4);
+                if (!bins[key]) bins[key] = { r: 0, g: 0, b: 0, n: 0, w: 0 };
+                const bin = bins[key];
+                bin.r += r; bin.g += g; bin.b += b; bin.n++; bin.w += weight;
+            }
+
+            const sorted = Object.values(bins).sort((x, y) => y.w - x.w);
+            if (!sorted.length) { alert('색을 추출하지 못했습니다.'); return; }
+
+            const picked = [];
+            for (const bin of sorted) {
+                const col = [Math.round(bin.r / bin.n), Math.round(bin.g / bin.n), Math.round(bin.b / bin.n)];
+                const close = picked.some(p => Math.abs(p[0] - col[0]) + Math.abs(p[1] - col[1]) + Math.abs(p[2] - col[2]) < 60);
+                if (!close) picked.push(col);
+                if (picked.length >= n) break;
+            }
+            const hexes = picked.map(cl => '#' + cl.map(v => v.toString(16).padStart(2, '0')).join('').toUpperCase());
+
+            (function(){
+                const n = currentTargetChar;
+                if (document.getElementById('extract-replace').checked) {
+                    document.querySelectorAll('#c'+n+'-palette-row .color-item').forEach(it => { if (it.dataset.permanent !== 'true') it.remove(); });
+                }
+                hexes.forEach((hex, idx) => {
+                    const base = document.getElementById('c'+n+'-color-'+(idx+1));
+                    if (base && document.getElementById('extract-replace').checked && idx < 2) {
+                        base.value = hex; updateColorFromText(base);
+                    } else {
+                        paletteCounts[n]++;
+                        rebuildPaletteItem(n, 'c'+n+'-color-'+paletteCounts[n], hex);
+                    }
+                });
+                triggerAutoSave();
+            })();
+            showToast(hexes.length + '개 색을 팔레트에 넣었습니다');
+        }
+
+        /* ===================== 캔버스 배경 ===================== */
+        function paintCanvasBackground() {
+            const mode = document.querySelector('input[name="bg-mode"]:checked')?.value || 'solid';
+            const c1 = document.getElementById('bg-color-1').value;
+            const c2 = document.getElementById('bg-color-2').value;
+            const angle = document.getElementById('bg-angle').value;
+            const ratio = document.getElementById('bg-ratio') ? document.getElementById('bg-ratio').value : 0;
+            document.getElementById('bg-angle-val').innerText = angle + '°';
+            const rv = document.getElementById('bg-ratio-val');
+            if (rv) rv.innerText = ratio + '%';
+            document.getElementById('main-canvas').style.background =
+                (mode === 'gradient')
+                ? 'linear-gradient(' + angle + 'deg, ' + c1 + ' ' + ratio + '%, ' + c2 + ' 100%)'
+                : c1;
+            document.getElementById('bg-gradient-row').style.display = (mode === 'gradient') ? 'flex' : 'none';
+        }
+        function applyCanvasBackground() { paintCanvasBackground(); triggerAutoSave(); }
+
+        function collectBgState() {
+            return {
+                mode: document.querySelector('input[name="bg-mode"]:checked')?.value || 'solid',
+                c1: document.getElementById('bg-color-1').value,
+                c2: document.getElementById('bg-color-2').value,
+                angle: document.getElementById('bg-angle').value,
+            ratio: document.getElementById('bg-ratio') ? document.getElementById('bg-ratio').value : 0
+            };
+        }
+        function applyBgState(bg) {
+            if (!bg) return;
+            const bm = document.querySelector('input[name="bg-mode"][value="' + bg.mode + '"]');
+            if (bm) bm.checked = true;
+            document.getElementById('bg-color-1').value = bg.c1 || '#ffffff';
+            document.getElementById('bg-color-2').value = bg.c2 || '#e0f2fe';
+            document.getElementById('bg-angle').value = bg.angle || 135;
+        if (document.getElementById('bg-ratio')) document.getElementById('bg-ratio').value = bg.ratio || 0;
+            paintCanvasBackground();
+        }
+
+        /* ===================== 모바일 터치 대응 ===================== */
+        function enableTouchSupport() {
+            const forward = (te, type) => {
+                if (te.touches.length > 1) return;
+                const t = te.changedTouches[0];
+                if (!t) return;
+                const target = te.currentTarget === document ? document.elementFromPoint(t.clientX, t.clientY) : te.target;
+                if (!target) return;
+                target.dispatchEvent(new MouseEvent(type, {
+                    bubbles: true, cancelable: true, view: window,
+                    clientX: t.clientX, clientY: t.clientY, button: 0
+                }));
+            };
+
+            document.addEventListener('touchstart', e => {
+                if (e.target.closest('input, textarea, button, label, select, a')) return;
+                if (e.target.closest('.draggable-sticker, .upload-zone, .drag-handle')) {
+                    forward(e, 'mousedown');
+                    if (e.cancelable && e.touches.length === 1) e.preventDefault();
+                }
+            }, { passive: false });
+            document.addEventListener('touchmove', e => { if (e.touches.length <= 1) forward(e, 'mousemove'); }, { passive: true });
+            document.addEventListener('touchend', e => forward(e, 'mouseup'), { passive: true });
+            document.addEventListener('touchcancel', e => forward(e, 'mouseup'), { passive: true });
+
+            document.querySelectorAll('.upload-zone').forEach(zone => {
+                let startDist = 0, startScale = 1;
+                zone.addEventListener('touchstart', e => {
+                    if (e.touches.length !== 2) return;
+                    const img = zone.querySelector('img');
+                    if (!img) return;
+                    startDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+                    startScale = parseFloat(img.dataset.scale) || 1;
+                }, { passive: true });
+                zone.addEventListener('touchmove', e => {
+                    if (e.touches.length !== 2) return;
+                    const img = zone.querySelector('img');
+                    if (!img || !startDist) return;
+                    if (e.cancelable) e.preventDefault();
+                    const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+                    const s = Math.max(0.1, startScale * (d / startDist));
+                    img.dataset.scale = s;
+                    img.style.transform = 'translate(' + img.dataset.posX + 'px, ' + img.dataset.posY + 'px) scale(' + s + ')';
+                }, { passive: false });
+                zone.addEventListener('touchend', e => {
+                    if (e.touches.length < 2 && startDist) { startDist = 0; triggerAutoSave(); }
+                }, { passive: true });
+            });
+
+            // 스티커 길게 누르기 = 우클릭(레이어 메뉴)
+            let pressTimer = null;
+            document.addEventListener('touchstart', e => {
+                const st = e.target.closest('.draggable-sticker');
+                if (!st) return;
+                pressTimer = setTimeout(() => {
+                    const t = e.touches[0];
+                    st.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: t.clientX, clientY: t.clientY }));
+                }, 550);
+            }, { passive: true });
+            const clearPress = () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } };
+            document.addEventListener('touchmove', clearPress, { passive: true });
+            document.addEventListener('touchend', clearPress, { passive: true });
+        }
+
+        /* 되돌리기 단축키 */
+        document.addEventListener('keydown', e => {
+            const typing = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA';
+            if ((e.ctrlKey || e.metaKey) && !typing) {
+                const k = e.key.toLowerCase();
+                if (k === 'z' && !e.shiftKey) { e.preventDefault(); doUndo(); return; }
+                if ((k === 'z' && e.shiftKey) || k === 'y') { e.preventDefault(); doRedo(); }
+            }
+        });
 
         // 스티커 우클릭 Z-Index 변경 로직
         let activeContextMenuSticker = null;
@@ -1280,7 +1945,8 @@
 
 
         // DB 영구 저장 로직
-        async function saveAllDataToDB() {
+        // 현재 상태를 한 덩어리로 모읍니다 (자동저장·되돌리기·슬롯·백업 공용).
+        function collectState() {
             const data = { charSettings: charSettings };
             for(let i=1; i<=5; i++) {
                 const specInputs = document.querySelectorAll(`#c${i}-spec-container .input-spec-field`);
@@ -1291,7 +1957,8 @@
                 document.querySelectorAll(`#c${i}-palette-row .color-item`).forEach((item) => {
                     const inputColor = item.querySelector('input[type="text"]');
                     const isPermanent = item.getAttribute('data-permanent') === 'true';
-                    if (inputColor) savedPalettes.push({ id: inputColor.id, color: inputColor.value, isPermanent: isPermanent });
+                    const lb = item.querySelector('.color-label-input');
+                    if (inputColor) savedPalettes.push({ id: inputColor.id, color: inputColor.value, label: lb ? lb.value : '', isPermanent: isPermanent });
                 });
 
                 let savedImage = null;
@@ -1323,19 +1990,32 @@
                 canvasExt: document.getElementById('height-slider').value,
                 memberCount: document.querySelector('input[name="member-count-choice"]:checked')?.value || '5',
                 focusMode: document.getElementById('focus-mode-toggle').checked,
-                snapEnabled: snapEnabled
+                snapEnabled: snapEnabled,
+                bg: collectBgState()
             };
             
+            return data;
+        }
+
+        async function saveAllDataToDB() {
+            const data = collectState();
+            pushUndoSnapshot(data);
             await dbHelper.save('commission_v9_data', data);
-            
+
             const toast = document.getElementById('toast-notification');
             toast.style.opacity = '1';
             setTimeout(() => { toast.style.opacity = '0'; }, 2000);
         }
 
         async function loadDataFromDB() {
-            initCharSettings();
             const data = await dbHelper.load('commission_v9_data');
+            applyState(data);
+            lastSnapshot = collectState();
+        }
+
+        // 상태 객체를 화면에 반영합니다 (불러오기·되돌리기 공용).
+        function applyState(data) {
+            initCharSettings();
             
             for(let i=1; i<=5; i++) {
                 document.getElementById(`c${i}-desc-container`).innerHTML = '';
@@ -1372,6 +2052,8 @@
                             snapEnabled = g.snapEnabled;
                             document.getElementById('snap-toggle').checked = snapEnabled;
                         }
+
+                        applyBgState(g.bg);
                     }
 
                     for(let i=1; i<=5; i++) {
@@ -1390,7 +2072,7 @@
                             } else { buildInitialSpecsLayout(i); }
 
                             if(cData.palettes && cData.palettes.length > 0) {
-                                cData.palettes.forEach(p => rebuildPaletteItem(i, p.id, p.color, p.isPermanent));
+                                cData.palettes.forEach(p => rebuildPaletteItem(i, p.id, p.color, p.isPermanent, p.label));
                                 paletteCounts[i] = cData.palettes.length;
                             } else { provideDefaultPalettes(i); }
 
@@ -1701,7 +2383,46 @@
             triggerAutoSave();
         }
 
-        function rebuildPaletteItem(charNum, id, colorHex, isPermanent = false) {
+
+        // 팔레트 색 순서를 드래그로 바꿉니다.
+        let draggedColorItem = null;
+        function bindPaletteDrag(item) {
+            if (item.dataset.dragBound) return;   // 중복 등록 방지
+            item.dataset.dragBound = '1';
+            item.setAttribute('draggable', 'true');
+            item.addEventListener('dragstart', function (e) {
+                if (e.target.tagName === 'INPUT') { e.preventDefault(); return; }
+                draggedColorItem = this;
+                e.dataTransfer.effectAllowed = 'move';
+                setTimeout(() => this.classList.add('dragging'), 0);
+            });
+            item.addEventListener('dragend', function () {
+                this.classList.remove('dragging');
+                document.querySelectorAll('.color-item.drop-target').forEach(el => el.classList.remove('drop-target'));
+                draggedColorItem = null;
+                triggerAutoSave();
+            });
+            item.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                if (draggedColorItem && draggedColorItem !== this && this.parentNode === draggedColorItem.parentNode) {
+                    this.classList.add('drop-target');
+                }
+            });
+            item.addEventListener('dragleave', function () { this.classList.remove('drop-target'); });
+            item.addEventListener('drop', function (e) {
+                e.stopPropagation();
+                this.classList.remove('drop-target');
+                if (draggedColorItem && draggedColorItem !== this && this.parentNode === draggedColorItem.parentNode) {
+                    const row = this.parentNode;
+                    const items = Array.from(row.children);
+                    if (items.indexOf(draggedColorItem) < items.indexOf(this)) row.insertBefore(draggedColorItem, this.nextSibling);
+                    else row.insertBefore(draggedColorItem, this);
+                }
+            });
+        }
+
+        function rebuildPaletteItem(charNum, id, colorHex, isPermanent = false, label = '') {
             const newItem = document.createElement('div');
             newItem.className = 'color-item';
             if (isPermanent) newItem.dataset.permanent = 'true';
@@ -1712,9 +2433,11 @@
                 ${delBtn}
                 <div class="color-preview" style="background-color: ${colorHex};"><input type="color" value="${colorHex}" oninput="updateColorFromPicker(this, '${id}')"></div>
                 <input type="text" id="${id}" class="color-code-input" value="${colorHex.toUpperCase()}" onchange="updateColorFromText(this)">
+                <input type="text" class="color-label-input" placeholder="이름" value="${(label || '').replace(/"/g, '&quot;')}">
             `;
             document.getElementById(`c${charNum}-palette-row`).appendChild(newItem);
             newItem.querySelectorAll('input').forEach(input => input.addEventListener('input', triggerAutoSave));
+            bindPaletteDrag(newItem);
         }
 
         function createNewSticker(event) {
@@ -1807,7 +2530,11 @@
             });
         }
 
+        let autoSaveListenersBound = false;
         function setupAutoSaveListeners() {
+            // 되돌리기로 applyState가 다시 불릴 때 중복 등록되지 않도록 합니다.
+            if (autoSaveListenersBound) return;
+            autoSaveListenersBound = true;
             document.querySelectorAll('input[type="text"], textarea, input[type="range"], input[type="color"], input[type="radio"], input[type="checkbox"]').forEach(element => {
                 element.addEventListener('input', triggerAutoSave); 
                 element.addEventListener('change', triggerAutoSave);
@@ -1902,7 +2629,7 @@
                 html2canvas(canvasElement, {
                     scale: 2, 
                     useCORS: true, 
-                    backgroundColor: "#ffffff", 
+                    backgroundColor: null, 
                     logging: false, 
                     width: canvasElement.offsetWidth, 
                     height: canvasElement.offsetHeight
@@ -1934,7 +2661,13 @@
 
         window.addEventListener('resize', autoResponsiveScale);
         window.addEventListener('scroll', () => { if (document.getElementById('canvas-help-overlay').classList.contains('active')) positionHudGuide(); }, true);
-        window.addEventListener('DOMContentLoaded', loadDataFromDB);
+        window.addEventListener('DOMContentLoaded', async () => {
+            await loadDataFromDB();
+            enableTouchSupport();
+            setupSidebarUX();
+            refreshCharOpTarget();
+            updateUndoButtons();
+        });
     </script>
 </body>
 </html>
