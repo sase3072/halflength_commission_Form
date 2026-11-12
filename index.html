@@ -218,6 +218,7 @@
         .align-btn .ui-icon { width: 15px; height: 15px; }
         .align-btn:hover { background: #1e293b; color: #ffffff; }
         .align-btn-divider { width: 1px; height: 18px; background: rgba(255,255,255,0.15); margin: 0 3px; flex-shrink: 0; }
+        .slider-row.is-auto { opacity: .45; }
         .stk-stroke { display: flex; align-items: center; gap: 6px; padding: 0 6px 0 4px; color: #cbd5e1; font-size: 11px; font-weight: 700; white-space: nowrap; }
         .stk-stroke input[type=color] { width: 22px; height: 22px; padding: 0; border: 1px solid rgba(255,255,255,.25); border-radius: 5px; background: none; cursor: pointer; }
         .stk-stroke input[type=color]::-webkit-color-swatch-wrapper { padding: 0; }
@@ -1061,9 +1062,13 @@
                     </div>
                     <div class="sidebar-title-left" style="font-size:10px;color:#64748b;">순서 표기 크기</div>
                     <div class="slider-row">
-                        <input type="range" id="badge-size-slider" min="12" max="48" value="17" step="1" oninput="changeBadgeSize(this.value)">
+                        <input type="range" id="badge-size-slider" min="12" max="48" value="17" step="1" oninput="setBadgeAuto(false, true); changeBadgeSize(this.value)">
                         <span id="badge-size-val">17px</span>
                     </div>
+                    <label style="display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;" title="큰 순서 글자의 높이를 오른쪽 이름 묶음 높이에 자동으로 맞춥니다. 슬라이더를 움직이면 직접 조절로 바뀌어요.">
+                        <span style="font-size:10px;color:#64748b;font-weight:700;">이름 높이에 자동 맞춤</span>
+                        <input type="checkbox" id="badge-auto-toggle" checked style="accent-color:#0f172a;" onchange="setBadgeAuto(this.checked)">
+                    </label>
                     <label style="display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;">
                         <span style="font-size:10px;color:#64748b;font-weight:700;">순서 표기 (A·B)</span>
                         <input type="checkbox" id="badge-visible-toggle" checked style="accent-color:#0f172a;" onchange="setBadgeVisible(this.checked)">
@@ -1739,14 +1744,12 @@
                 let lastDy = 0;
                 li.classList.add('desc-lifted');
                 list.classList.add('desc-sorting');
-                // 자리를 바꾸면(DOM 이동) 포인터 붙잡기가 풀리므로 문서 전체에서 움직임을 받습니다
-                const pid = e.pointerId;
+                try { li.setPointerCapture(e.pointerId); } catch (_) {}
 
                 const place = () => { li.style.transform = 'translateY(' + (homeTop + lastDy - li.offsetTop) + 'px) scale(1.035) rotate(-1.2deg)'; };
                 place();
 
                 const onMove = ev => {
-                    if (ev.pointerId !== pid) return;
                     let dy = (ev.clientY - startY) / scale;
                     dy = Math.max(minTop - homeTop - 6, Math.min(maxTop - homeTop + 6, dy));
                     lastDy = dy;
@@ -1771,10 +1774,10 @@
                     place();
                 };
                 const onUp = ev => {
-                    if (ev.pointerId !== pid) return;
-                    window.removeEventListener('pointermove', onMove, true);
-                    window.removeEventListener('pointerup', onUp, true);
-                    window.removeEventListener('pointercancel', onUp, true);
+                    li.removeEventListener('pointermove', onMove);
+                    li.removeEventListener('pointerup', onUp);
+                    li.removeEventListener('pointercancel', onUp);
+                    try { li.releasePointerCapture(ev.pointerId); } catch (_) {}
                     list.classList.remove('desc-sorting');
                     // 빈자리에 '톡' 붙기
                     li.classList.remove('desc-lifted');
@@ -1790,9 +1793,9 @@
                     setTimeout(done, 400);
                     if (onDone) onDone();
                 };
-                window.addEventListener('pointermove', onMove, true);
-                window.addEventListener('pointerup', onUp, true);
-                window.addEventListener('pointercancel', onUp, true);
+                li.addEventListener('pointermove', onMove);
+                li.addEventListener('pointerup', onUp);
+                li.addEventListener('pointercancel', onUp);
             });
         }
 
@@ -1877,6 +1880,83 @@
     let nameStyle = 'plate';
     function fitBadge(el) { el.style.setProperty('--n', Math.max(1, Array.from(el.value || '').length)); }
     function fitAllBadges() { document.querySelectorAll('#main-canvas .input-badge').forEach(fitBadge); }
+
+    /* ===== 순서 표기 자동 크기 =====
+       큰 순서 글자(A·B·1…)의 '실제 글자 높이'를 오른쪽 이름 묶음(이름 / 작은 이름 / 원문)의
+       맨 윗 글자부터 맨 아랫 글자까지의 높이에 맞추고, 윗선도 나란히 맞춥니다.
+       이름을 고치거나 글씨 크기·서체·작은 이름 표시가 바뀌면 자동으로 다시 맞춰요. */
+    var badgeAuto = true;
+    const _bdgCtx = document.createElement('canvas').getContext('2d');
+    // 글자가 실제로 칠해지는 위·아래(잉크) 위치 — 요소 위쪽 기준 CSS px
+    function _bdgInk(el, text, boxH) {
+        // 입력칸 안의 글자 기준선은 줄 높이를 'normal'로 잡고 세로 가운데에 놓입니다(한글 대체 글꼴 포함).
+        // 같은 조건의 보이지 않는 복제 줄을 화면 밖에 만들어 기준선을 실제로 재고, 글자 잉크 높이는 캔버스로 잽니다.
+        const cs = getComputedStyle(el);
+        const font = cs.fontStyle + ' ' + cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
+        let mir = document.getElementById('__badge-mirror');
+        if (!mir) {
+            mir = document.createElement('div'); mir.id = '__badge-mirror';
+            mir.style.cssText = 'position:absolute;left:-10000px;top:0;width:2000px;display:flex;align-items:center;visibility:hidden;pointer-events:none;';
+            mir.innerHTML = '<div style="line-height:normal;white-space:pre"><span></span><i style="display:inline-block;width:0;height:0;vertical-align:baseline"></i></div>';
+            document.body.appendChild(mir);
+        }
+        const bT = parseFloat(cs.borderTopWidth) || 0, bB = parseFloat(cs.borderBottomWidth) || 0;
+        const padT = parseFloat(cs.paddingTop) || 0, padB = parseFloat(cs.paddingBottom) || 0;
+        const h = (boxH != null ? boxH : el.offsetHeight) - bT - bB - padT - padB;
+        mir.style.height = Math.max(0, h) + 'px'; mir.style.font = font; mir.style.letterSpacing = cs.letterSpacing;
+        mir.querySelector('span').textContent = text;
+        const base = mir.querySelector('i').getBoundingClientRect().top - mir.getBoundingClientRect().top + bT + padT;
+        _bdgCtx.font = font;
+        const m = _bdgCtx.measureText(text);
+        return [base - m.actualBoundingBoxAscent, base + m.actualBoundingBoxDescent];
+    }
+    function fitBadgeToName(badge) {
+        const box = badge.parentElement, lines = box && box.querySelector('.name-lines');
+        const canvas = document.getElementById('main-canvas');
+        badge.style.top = '';
+        if (!badgeAuto || !lines || !canvas.classList.contains('name-plate')) { badge.style.fontSize = ''; badge.style.position = ''; return; }
+        if (!badge.offsetParent) return;                       // 숨겨진 칸은 보일 때 다시 맞춤
+        const txt = (badge.value || '').trim(); if (!txt) return;
+        const sc = (canvas.getBoundingClientRect().width / canvas.offsetWidth) || 1;
+        const rows = () => Array.from(lines.children).filter(el => el.offsetHeight > 0 && (el.value || '').trim());
+        const yOf = el => (el.getBoundingClientRect().top - box.getBoundingClientRect().top) / sc;
+        const hOf = el => el.getBoundingClientRect().height / sc;
+        const span = () => { const r = rows(); if (!r.length) return null; const a = r[0], z = r[r.length - 1];
+            return [yOf(a) + _bdgInk(a, a.value, hOf(a))[0], yOf(z) + _bdgInk(z, z.value, hOf(z))[1]]; };
+        let s = span(); if (!s || !(s[1] - s[0] > 4)) return;
+        // 1) 글자 크기: 순서 글자의 잉크 높이 = 이름 묶음 잉크 높이
+        const cs = getComputedStyle(badge);
+        _bdgCtx.font = cs.fontStyle + ' ' + cs.fontWeight + ' 100px ' + cs.fontFamily;
+        const m = _bdgCtx.measureText(txt), ink100 = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent;
+        if (!(ink100 > 0)) return;
+        badge.style.fontSize = Math.max(12, Math.min(240, 100 * (s[1] - s[0]) / ink100)).toFixed(1) + 'px';
+        // 2) 윗선 맞춤 (크기가 바뀌며 줄 위치가 달라졌을 수 있어 다시 측정)
+        s = span(); if (!s) return;
+        badge.style.position = 'relative';
+        const bTop = yOf(badge) + _bdgInk(badge, txt, hOf(badge))[0];
+        badge.style.top = (s[0] - bTop).toFixed(1) + 'px';
+    }
+    let _bdgRaf = 0;
+    function fitAllBadgesToNames() {
+        cancelAnimationFrame(_bdgRaf);
+        _bdgRaf = requestAnimationFrame(() => document.querySelectorAll('#main-canvas .input-badge').forEach(fitBadgeToName));
+    }
+    function setBadgeAuto(on, silent) {
+        badgeAuto = !!on;
+        const c = document.getElementById('badge-auto-toggle'); if (c) c.checked = badgeAuto;
+        const sl = document.getElementById('badge-size-slider'); if (sl && sl.closest('.slider-row')) sl.closest('.slider-row').classList.toggle('is-auto', badgeAuto);
+        fitAllBadgesToNames();
+        if (!silent) { if (typeof triggerAutoSave === 'function') triggerAutoSave(); else if (typeof saveToLocalStorage === 'function') saveToLocalStorage(); }
+    }
+    document.addEventListener('input', e => {
+        if (badgeAuto && e.target.closest && e.target.closest('#main-canvas .name-container-vertical, #main-canvas .name-container')) fitAllBadgesToNames();
+    }, true);
+    if (window.ResizeObserver) {
+        const _bdgRO = new ResizeObserver(() => { if (badgeAuto) fitAllBadgesToNames(); });
+        document.querySelectorAll('#main-canvas .name-lines').forEach(n => _bdgRO.observe(n));
+    }
+    if (document.fonts) { document.fonts.addEventListener && document.fonts.addEventListener('loadingdone', fitAllBadgesToNames); document.fonts.ready.then(fitAllBadgesToNames); }
+    fitAllBadgesToNames();
     function setNameStyle(mode, silent) {
         nameStyle = 'plate';
         document.getElementById('main-canvas').classList.add('name-plate');
@@ -3596,6 +3676,7 @@
                 canvasTopExt: canvasTopExtra,
                 perspective: viewPerspective,
                 badgeSize: badgeSize,
+                badgeAuto: badgeAuto,
                 badgeVisible: badgeVisible,
                 nameSize: nameSize,
                 hanjaSize: hanjaSize,
@@ -3683,6 +3764,7 @@
                         setCanvasTopExtra(g.canvasTopExt || 0, false);
                         setViewPerspective(g.perspective || 'viewer');
                         changeBadgeSize(g.badgeSize || 17);
+                        setBadgeAuto(g.badgeAuto !== false, true);
                         changeNameSize(g.nameSize || 24);
                         changeHanjaSize(g.hanjaSize || 12);
                         window.__legacyBadgeColor = g.badgeColor || null;
@@ -5276,6 +5358,8 @@
                     textSpan.style.position = 'relative'; textSpan.style.top = '-1.5px'; 
                 }
 
+                // 입력칸에 따로 준 세로 위치 보정(순서 표기 자동 맞춤)을 저장 이미지에도 그대로 반영
+                if (input.style.top) { textSpan.style.position = 'relative'; textSpan.style.top = ((parseFloat(input.style.top) || 0) + (parseFloat(textSpan.style.top) || 0)) + 'px'; }
                 input.parentNode.insertBefore(textSpan, input); input.style.display = 'none';
                 savedTransfers.push({ originalInput: input, temporarySpan: textSpan });
             });
