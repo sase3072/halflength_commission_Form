@@ -84,7 +84,7 @@
         .sidebar-color-picker { width: 28px; height: 16px; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer; padding: 0; background: none; }
 
         /* 메인 캔버스 */
-        .template-outer { position: relative; width: 2240px; height: 1000px; background: var(--card-bg); box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08); overflow: hidden; border-radius: 20px; flex-shrink: 0; border: 1px solid var(--border-color); display: flex; padding: 30px 20px; gap: 20px; transform-origin: top left; transition: height 0.3s ease, width 0.3s ease; }
+        .template-outer { position: relative; width: 2240px; height: 1000px; background: var(--card-bg); box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08); overflow: hidden; border-radius: 20px; flex-shrink: 0; border: 1px solid var(--border-color); display: flex; padding: 30px 20px; gap: 20px; transform-origin: top left; transition: height 0.3s ease; }
         .credit-tag { position: absolute; top: 12px; right: 16px; font-size: 11px; font-weight: 700; color: #cbd5e1; letter-spacing: 0.5px; z-index: 100; }
         /* 크레딧 아래 직접 적는 커미션 자료 출처 (엔터로 여러 줄) */
         /* 아래 글씨가 들어갈 만큼 캔버스 하단 여백을 늘려, 캐릭터 칸 테두리와 겹치지 않게 합니다. */
@@ -130,8 +130,10 @@
         .upload-zone img { position: absolute; min-width: 100%; min-height: 100%; object-fit: cover; cursor: move; user-select: none; transform-origin: center center; }
         .placeholder-text { color: #94a3b8; text-align: center; font-size: 12px; z-index: 1; padding: 2px; pointer-events: none; line-height: 1.3; display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .upload-hint { position: absolute; bottom: 5px; right: 5px; font-size: 9px; color: #94a3b8; background: rgba(255,255,255,0.8); padding: 2px 4px; border-radius: 3px; pointer-events: none; z-index: 2; }
-        .main-headshot-box { width: 320px; height: 500px; border-radius: 18px; flex-shrink: 0; box-shadow: 0 8px 20px rgba(15,23,42,0.06); }
-        .template-outer.mode-head .main-headshot-box { width: 300px; height: 300px; border-radius: 16px; }
+        .main-headshot-box { width: var(--shot-w, 320px); height: var(--shot-h, 500px); border-radius: 18px; flex-shrink: 0; box-shadow: 0 8px 20px rgba(15,23,42,0.06); }
+        .template-outer.mode-head .main-headshot-box { width: var(--shot-w, 320px); height: var(--shot-w, 320px); border-radius: 16px; }
+        /* 이름 칸 · 외관 설명은 이미지 칸 가로폭에 맞춤 */
+        .profile-info > .name-container-vertical, .profile-info > .desc-list-wrapper { max-width: var(--shot-w, 320px); }
 
         .palette-container { width: 320px; flex-shrink: 0; margin-top: 4px; }
         .palette-row { display: flex; gap: 6px; width: 100%; justify-content: center; }
@@ -148,8 +150,8 @@
             font-size: var(--badge-size, 17px); font-weight: 800; color: var(--badge-color, #94a3b8); text-align: center; outline: none; }
         .badges-off .input-badge { display: none !important; }
         .input-badge:focus { color: #0f172a; }
-        .input-name { font-size: 22px; font-weight: 700; border: none; width: 100%; outline: none; text-align: center; background: transparent; color: #0f172a; }
-        .input-hanja { font-size: 13px; color: #94a3b8; border: none; width: 100%; outline: none; text-align: center; background: transparent; margin-top: 2px;}
+        .input-name { font-size: var(--name-size, 22px); font-weight: 700; border: none; width: 100%; outline: none; text-align: center; background: transparent; color: #0f172a; }
+        .input-hanja { font-size: var(--hanja-size, 13px); color: #94a3b8; border: none; width: 100%; outline: none; text-align: center; background: transparent; margin-top: 2px;}
         
         .spec-dynamic-row { display: flex; justify-content: center; align-items: center; gap: 6px; width: 100%; flex-wrap: nowrap; }
         .spec-box-item { background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 4px; display: flex; align-items: center; justify-content: center; position: relative; min-width: 0; max-width: 80px; flex: 1 1 0; }
@@ -165,8 +167,12 @@
         .drag-handle { position: absolute; left: 0; color: #94a3b8; cursor: grab; padding: 4px 0; display: flex; align-items: center; justify-content: center; width: 14px; }
         .drag-handle:active { cursor: grabbing; }
         .bullet-dot { font-size: 14px; font-weight: 900; color: #334155; margin-right: 6px; margin-left: 4px; line-height: 1; flex-shrink: 0; }
-        
-        .desc-list li.dragging { opacity: 0.5; background-color: #f1f5f9; }
+
+        .desc-list li.desc-lifted { z-index: 20; background: #fff; box-shadow: 0 12px 24px rgba(15,23,42,.18), 0 2px 6px rgba(15,23,42,.10); cursor: grabbing; }
+        .desc-list li.desc-dropping { z-index: 20; }
+        .desc-list.desc-sorting, .desc-list.desc-sorting * { user-select: none; cursor: grabbing !important; }
+        .desc-list li .drag-handle, .desc-list li .bullet-dot { touch-action: none; }
+        .hide-on-save .desc-list li.desc-lifted { box-shadow: none; }
         /* 완성본 미리보기 */
         .preview-modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15,23,42,0.75); backdrop-filter: blur(3px); z-index: 200002; display: none; align-items: center; justify-content: center; padding: 24px; }
         .preview-modal-overlay.active { display: flex; }
@@ -212,6 +218,12 @@
         .align-btn .ui-icon { width: 15px; height: 15px; }
         .align-btn:hover { background: #1e293b; color: #ffffff; }
         .align-btn-divider { width: 1px; height: 18px; background: rgba(255,255,255,0.15); margin: 0 3px; flex-shrink: 0; }
+        .stk-stroke { display: flex; align-items: center; gap: 6px; padding: 0 6px 0 4px; color: #cbd5e1; font-size: 11px; font-weight: 700; white-space: nowrap; }
+        .stk-stroke input[type=color] { width: 22px; height: 22px; padding: 0; border: 1px solid rgba(255,255,255,.25); border-radius: 5px; background: none; cursor: pointer; }
+        .stk-stroke input[type=color]::-webkit-color-swatch-wrapper { padding: 0; }
+        .stk-stroke input[type=color]::-webkit-color-swatch { border: none; border-radius: 4px; }
+        .stk-stroke input[type=range] { width: 84px; accent-color: #38bdf8; cursor: pointer; }
+        #stk-stroke-val { min-width: 16px; text-align: right; color: #94a3b8; font-variant-numeric: tabular-nums; }
 
         /* 자석 스냅 ON/OFF 토글 행 */
         .snap-toggle-row { display: flex; align-items: center; justify-content: space-between; background: #fdf4ff; border: 1px solid #f5d0fe; padding: 10px 12px; border-radius: 10px; font-size: 11px; font-weight: 700; color: #86198f; }
@@ -508,20 +520,17 @@
         .input-subname { display: none; font-size: 16px; font-weight: 500; border: none; width: 100%; outline: none; text-align: center; background: transparent; color: #475569; }
         .input-subname::placeholder { color: #cbd5e1; font-weight: 400; }
         /* 네임플레이트 스타일: [큰 순서 글자]  이름 / 작은 이름 / 원문 (오른쪽 정렬, 위아래 선) */
-        .template-outer.name-plate :is(.name-container, .name-container-vertical) { flex-direction: row; align-items: center; justify-content: space-between; gap: 10px; padding: 2px 4px; }
+        .template-outer.name-plate :is(.name-container, .name-container-vertical) { flex-direction: row; align-items: center; justify-content: space-between; gap: 10px; padding: 2px 4px; max-width: var(--shot-w, 320px); }
         .template-outer.name-plate .input-badge { display: block; flex: 0 0 auto; width: calc(var(--n, 1) * 0.8em + 0.3em); margin: 0; font-size: calc(var(--badge-size, 17px) * 2.4); line-height: 1; text-align: left; }
         .template-outer.name-plate.badges-off .input-badge { display: none !important; }
         .template-outer.name-plate .name-lines { flex: 1 1 0; align-items: flex-end; }
-        .template-outer.name-plate .input-name { font-size: 30px; font-weight: 800; line-height: 1; text-align: right; color: var(--badge-color, #334155); }
+        .template-outer.name-plate .input-name { font-size: var(--name-size, 30px); font-weight: 800; line-height: 1; text-align: right; color: var(--badge-color, #334155); }
         .template-outer.name-plate .input-subname { display: block; font-size: 18px; font-weight: 500; text-align: right; color: var(--badge-color, #334155); }
         .template-outer.name-plate.subname-off .input-subname { display: none; }
-        .template-outer.name-plate .input-hanja { font-size: 14px; text-align: right; color: #94a3b8; margin-top: 0; }
+        .template-outer.name-plate .input-hanja { font-size: var(--hanja-size, 14px); text-align: right; color: #94a3b8; margin-top: 0; }
         .template-outer.name-plate .name-lines input { padding: 0; line-height: 1; height: auto; }
         .template-outer.name-plate .name-lines > * + * { margin-top: -3px; }
-            /* 다인용은 칸이 좁아 네임플레이트 글씨를 조금 줄입니다 */
-        .template-outer.name-plate .input-name { font-size: 24px; }
-        .template-outer.name-plate .input-subname { font-size: 15px; }
-        .template-outer.name-plate .input-hanja { font-size: 12px; }
+            /* 다인용은 칸이 좁아 네임플레이트 글씨를 조금 줄입니다 (CSS 변수가 설정되어 있으면 그 값 우선) */
     
         /* 페이퍼로지 (선택한 경우에만 내려받습니다) */
         @font-face { font-family: 'Paperozi'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-1Thin.woff2') format('woff2'); font-weight: 100; font-display: swap; }
@@ -661,6 +670,13 @@
         <button class="align-btn" title="아래쪽 정렬" onclick="alignSticker('bottom')"><svg class="ui-icon"><use href="#icon-align-bottom"/></svg></button>
         <div class="align-btn-divider"></div>
         <button class="align-btn" title="크기 맞추기 (처음 고른 스티커 기준)" onclick="matchStickerSize()"><svg class="ui-icon"><use href="#icon-same-size"/></svg></button>
+        <div class="align-btn-divider"></div>
+        <div class="stk-stroke" title="스티커 둘레에 획(테두리) 넣기 — 0이면 없음">
+            <span>획</span>
+            <input type="color" id="stk-stroke-color" value="#ffffff" oninput="applyStickerStroke()">
+            <input type="range" id="stk-stroke-w" min="0" max="24" step="1" value="0" oninput="applyStickerStroke()">
+            <span id="stk-stroke-val">0</span>
+        </div>
     </div>
 
     <button class="floating-toggle-btn" id="floating-sidebar-toggle" onclick="toggleSidebars()">
@@ -688,6 +704,20 @@
                 <div class="char-select-box" style="grid-template-columns: repeat(2, 1fr);">
                     <label class="char-select-label"><input type="radio" name="image-shape-choice" value="bust" checked onchange="setImageShape('bust')">반신</label>
                     <label class="char-select-label"><input type="radio" name="image-shape-choice" value="head" onchange="setImageShape('head')">두상</label>
+                </div>
+                <div class="font-size-control-vertical" style="margin-top:8px;">
+                    <div class="sidebar-title-left" style="font-size:10px;color:#64748b;">이미지 칸 가로폭</div>
+                    <div class="slider-row">
+                        <input type="range" id="shot-w-slider" min="240" max="640" value="320" step="10" oninput="changeShotSize(this.value, null)">
+                        <span id="shot-w-val" style="min-width:40px;text-align:right;">320px</span>
+                    </div>
+                    <div id="shot-h-wrap">
+                        <div class="sidebar-title-left" style="font-size:10px;color:#64748b;">이미지 칸 세로 길이 (반신)</div>
+                        <div class="slider-row">
+                            <input type="range" id="shot-h-slider" min="300" max="800" value="500" step="10" oninput="changeShotSize(null, this.value)">
+                            <span id="shot-h-val" style="min-width:40px;text-align:right;">500px</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -1019,6 +1049,16 @@
                         <span style="font-size:10px;color:#64748b;font-weight:700;">작은 이름 줄 (네임플레이트)</span>
                         <input type="checkbox" id="subname-visible-toggle" checked style="accent-color:#0f172a;" onchange="setSubnameVisible(this.checked)">
                     </label>
+                    <div class="sidebar-title-left" style="font-size:10px;color:#64748b;">이름 글씨 크기</div>
+                    <div class="slider-row">
+                        <input type="range" id="name-size-slider" min="12" max="48" value="24" step="1" oninput="changeNameSize(this.value)">
+                        <span id="name-size-val">24px</span>
+                    </div>
+                    <div class="sidebar-title-left" style="font-size:10px;color:#64748b;">소이름(원문) 글씨 크기</div>
+                    <div class="slider-row">
+                        <input type="range" id="hanja-size-slider" min="8" max="30" value="12" step="1" oninput="changeHanjaSize(this.value)">
+                        <span id="hanja-size-val">12px</span>
+                    </div>
                     <div class="sidebar-title-left" style="font-size:10px;color:#64748b;">순서 표기 크기</div>
                     <div class="slider-row">
                         <input type="range" id="badge-size-slider" min="12" max="48" value="17" step="1" oninput="changeBadgeSize(this.value)">
@@ -1583,7 +1623,7 @@
             const canvas = document.getElementById('main-canvas');
 
             if (isFocusMode) {
-                canvas.style.width = '420px';
+                canvas.style.width = Math.max(420, (typeof shotW === 'number' ? shotW : 320) + 100) + 'px';
                 for(let i=1; i<=5; i++) {
                     const col = document.getElementById(`char-col-${i}`);
                     const btn = document.getElementById(`lbl-char-${i}`);
@@ -1598,10 +1638,9 @@
                     }
                 }
             } else {
-                if (count === 2) canvas.style.width = '920px'; 
-                else if (count === 3) canvas.style.width = '1360px';
-                else if (count === 4) canvas.style.width = '1800px';
-                else canvas.style.width = '2240px';
+                // 칸당 440px(기본) — 이미지 칸을 넓히면 그만큼 캔버스도 넓어집니다
+                const perCol = Math.max(440, (typeof shotW === 'number' ? shotW : 320) + 120);
+                canvas.style.width = (40 + count * perCol) + 'px';
 
                 for(let i=1; i<=5; i++) {
                     const col = document.getElementById(`char-col-${i}`);
@@ -1622,7 +1661,139 @@
             if (parseInt(currentTargetChar) > count) handleColClick('1');
 
             triggerAutoSave();
-            setTimeout(autoResponsiveScale, 100); 
+            autoResponsiveScale();   // 폭이 바뀐 즉시 배율을 맞춰 화면이 튀지 않게
+        }
+
+
+        /* ===== 칸 크기를 바꿀 때 위에 얹힌 개체가 칸을 따라가게 =====
+           mutate() 전후로 각 칸(영역)의 위치를 재고, 스티커·말풍선·박스 등을
+           '자기가 놓여 있던 칸의 중심'이 움직인 만큼 함께 옮깁니다.
+           yPivot을 주면, 그 요소 아래쪽에 있던 개체는 늘어난 높이만큼 함께 내립니다. */
+        function keepObjectsAnchored(getRegions, mutate, yPivot) {
+            const canvas = document.getElementById('main-canvas');
+            const relX = el => { let x = 0; for (let e = el; e && e !== canvas; e = e.offsetParent) x += e.offsetLeft; return x; };
+            const relY = el => { let y = 0; for (let e = el; e && e !== canvas; e = e.offsetParent) y += e.offsetTop; return y; };
+            const measure = () => getRegions().filter(r => r && r.offsetWidth > 0).map(r => ({ el: r, l: relX(r), w: r.offsetWidth }));
+            const pivotBottom = () => { const p = yPivot && yPivot(); return p && p.offsetHeight ? relY(p) + p.offsetHeight : null; };
+            const before = measure(), pyBefore = pivotBottom();
+            mutate();
+            const after = new Map(measure().map(m => [m.el, m])), pyAfter = pivotBottom();
+            const dyPivot = (pyBefore != null && pyAfter != null) ? pyAfter - pyBefore : 0;
+            if (!before.length && !dyPivot) return;
+            const regionEls = before.map(b => b.el);
+            const nearest = cx => { let best = null, bd = Infinity; before.forEach(b => { const d = cx < b.l ? b.l - cx : (cx > b.l + b.w ? cx - b.l - b.w : 0); if (d < bd) { bd = d; best = b; } }); return best; };
+            const SEL = '.draggable-sticker, .float-bubble, .costume-box, .face-obj, .expr-box, .rel-box, #height-compare-group';
+            let relMoved = false;
+            canvas.querySelectorAll(SEL).forEach(el => {
+                if (el.parentElement && el.parentElement.closest(SEL)) return;   // 다른 개체 안에 든 것은 제외
+                const l = parseFloat(el.style.left), t = parseFloat(el.style.top);
+                const host = regionEls.find(r => r.contains(el));
+                let dx = 0, dy = 0;
+                if (!isNaN(l)) {
+                    if (host) {           // 칸 안에 들어 있는 개체: 칸 기준 좌표 → 칸 내용이 가운데로 이동한 만큼
+                        const b = before.find(x => x.el === host), a = after.get(host);
+                        if (a) dx = (a.w - b.w) / 2;
+                    } else {              // 캔버스 기준 개체: 놓여 있던 칸의 중심 이동량
+                        const b = nearest(l + el.offsetWidth / 2), a = b && after.get(b.el);
+                        if (a) dx = (a.l + a.w / 2) - (b.l + b.w / 2);
+                    }
+                }
+                if (dyPivot && !isNaN(t)) {
+                    const cy = (host ? relY(host) : 0) + t + el.offsetHeight / 2;
+                    if (cy > pyBefore) dy = dyPivot;
+                }
+                if (!dx && !dy) return;
+                const nl = Math.round(l + dx), nt = Math.round(t + dy);
+                if (dx) el.style.left = nl + 'px';
+                if (dy) el.style.top = nt + 'px';
+                const id = el.dataset && el.dataset.id;
+                if (el.id === 'height-compare-group' && typeof heightGroupPos !== 'undefined' && heightGroupPos.left != null) {
+                    if (dx) heightGroupPos.left = nl; if (dy) heightGroupPos.top = nt;
+                } else if (el.classList.contains('rel-box') && typeof relBoxes !== 'undefined') {
+                    const b = relBoxes.find(b => b.id === id); if (b) { if (dx) b.x = nl; if (dy) b.y = nt; relMoved = true; }
+                } else if (el.classList.contains('expr-box') && typeof exprBoxes !== 'undefined') {
+                    const b = exprBoxes.find(b => b.id === id); if (b) { if (dx) b.x = nl; if (dy) b.y = nt; }
+                }
+            });
+            if (relMoved && typeof renderRelArrows === 'function') renderRelArrows();
+        }
+
+        /* ===== 상세 외관 포인트: 블럭을 떼어내서 붙이는 순서 바꾸기 =====
+           집으면 블럭이 살짝 떠오르고, 지나가는 블럭들은 스르륵 비켜나며,
+           놓으면 빈자리에 톡 붙습니다. (캔버스 축소 배율에서도 정확하게 따라옵니다) */
+        function bindDescSort(li, onDone) {
+            li.removeAttribute('draggable');
+            const EASE = 'cubic-bezier(.2,.8,.2,1)';
+            li.addEventListener('pointerdown', e => {
+                if (e.button !== undefined && e.button !== 0) return;
+                if (e.target.closest('.desc-text, .row-del-btn, input, button')) return;
+                const list = li.parentNode;
+                if (!list) return;
+                e.preventDefault(); e.stopPropagation();
+                const scale = (li.getBoundingClientRect().height / (li.offsetHeight || 1)) || 1;
+                const startY = e.clientY;
+                const homeTop = li.offsetTop;          // 집은 순간의 자리(목록 기준)
+                const rows = () => Array.from(list.children).filter(x => x.tagName === 'LI');
+                const all = rows();
+                const minTop = all[0].offsetTop, maxTop = all[all.length - 1].offsetTop + all[all.length - 1].offsetHeight - li.offsetHeight;
+                let lastDy = 0;
+                li.classList.add('desc-lifted');
+                list.classList.add('desc-sorting');
+                // 자리를 바꾸면(DOM 이동) 포인터 붙잡기가 풀리므로 문서 전체에서 움직임을 받습니다
+                const pid = e.pointerId;
+
+                const place = () => { li.style.transform = 'translateY(' + (homeTop + lastDy - li.offsetTop) + 'px) scale(1.035) rotate(-1.2deg)'; };
+                place();
+
+                const onMove = ev => {
+                    if (ev.pointerId !== pid) return;
+                    let dy = (ev.clientY - startY) / scale;
+                    dy = Math.max(minTop - homeTop - 6, Math.min(maxTop - homeTop + 6, dy));
+                    lastDy = dy;
+                    const center = homeTop + dy + li.offsetHeight / 2;
+                    const others = rows().filter(x => x !== li);
+                    let before = null;
+                    for (const s of others) { if (center < s.offsetTop + s.offsetHeight / 2) { before = s; break; } }
+                    if (before !== li.nextElementSibling || (before === null && li !== list.lastElementChild)) {
+                        // FLIP: 자리를 바꾼 뒤, 비켜난 블럭들이 원래 자리에서 미끄러지듯 이동
+                        const first = new Map(others.map(s => [s, s.offsetTop]));
+                        if (before) list.insertBefore(li, before); else list.appendChild(li);
+                        others.forEach(s => {
+                            const d = first.get(s) - s.offsetTop;
+                            if (!d) return;
+                            s.style.transition = 'none';
+                            s.style.transform = 'translateY(' + d + 'px)';
+                            s.offsetHeight; // 강제 리플로우
+                            s.style.transition = 'transform .2s ' + EASE;
+                            s.style.transform = '';
+                        });
+                    }
+                    place();
+                };
+                const onUp = ev => {
+                    if (ev.pointerId !== pid) return;
+                    window.removeEventListener('pointermove', onMove, true);
+                    window.removeEventListener('pointerup', onUp, true);
+                    window.removeEventListener('pointercancel', onUp, true);
+                    list.classList.remove('desc-sorting');
+                    // 빈자리에 '톡' 붙기
+                    li.classList.remove('desc-lifted');
+                    li.classList.add('desc-dropping');
+                    li.style.transition = 'transform .26s cubic-bezier(.3,1.5,.5,1), box-shadow .26s ' + EASE;
+                    li.style.transform = '';
+                    const done = () => {
+                        li.removeEventListener('transitionend', done);
+                        li.classList.remove('desc-dropping');
+                        li.style.transition = '';
+                    };
+                    li.addEventListener('transitionend', done);
+                    setTimeout(done, 400);
+                    if (onDone) onDone();
+                };
+                window.addEventListener('pointermove', onMove, true);
+                window.addEventListener('pointerup', onUp, true);
+                window.addEventListener('pointercancel', onUp, true);
+            });
         }
 
         function autoResponsiveScale() {
@@ -1700,7 +1871,7 @@
         }
 
         // 캐릭터 표시(A·B 등)의 글씨 크기와 색 — 모든 캐릭터에 함께 적용됩니다.
-        let badgeSize = 17, badgeVisible = true;
+        let badgeSize = 17, badgeVisible = true, nameSize = 24, hanjaSize = 12;
 
     // ===== 이름 칸 스타일 (네임플레이트 고정) =====
     let nameStyle = 'plate';
@@ -1722,6 +1893,20 @@
     document.querySelectorAll('#main-canvas .input-badge').forEach(b => b.addEventListener('input', () => fitBadge(b)));
     fitAllBadges();
     const BADGE_COUNT = 5;
+        function changeNameSize(val) {
+            nameSize = parseInt(val) || 24;
+            document.getElementById('name-size-slider').value = nameSize;
+            document.getElementById('name-size-val').innerText = nameSize + 'px';
+            document.documentElement.style.setProperty('--name-size', nameSize + 'px');
+            triggerAutoSave();
+        }
+        function changeHanjaSize(val) {
+            hanjaSize = parseInt(val) || 12;
+            document.getElementById('hanja-size-slider').value = hanjaSize;
+            document.getElementById('hanja-size-val').innerText = hanjaSize + 'px';
+            document.documentElement.style.setProperty('--hanja-size', hanjaSize + 'px');
+            triggerAutoSave();
+        }
         function changeBadgeSize(val) {
             badgeSize = parseInt(val) || 17;
             document.getElementById('badge-size-slider').value = badgeSize;
@@ -1776,6 +1961,29 @@
             triggerAutoSave();
         }
 
+        // 이미지 칸 크기 — 가로폭은 이름 칸·외관 설명 폭에도 그대로 적용됩니다.
+        var shotW = 320, shotH = 500;   // var: updateColumnVisibility가 먼저 불려도 안전
+        function changeShotSize(w, h, silent) {
+            if (w !== null && w !== undefined) shotW = Math.max(240, Math.min(640, parseInt(w) || 320));
+            if (h !== null && h !== undefined) shotH = Math.max(300, Math.min(800, parseInt(h) || 500));
+            const ws = document.getElementById('shot-w-slider'), hs = document.getElementById('shot-h-slider');
+            if (ws) { ws.value = shotW; document.getElementById('shot-w-val').innerText = shotW + 'px'; }
+            if (hs) { hs.value = shotH; document.getElementById('shot-h-val').innerText = shotH + 'px'; }
+            const apply = () => {
+                const root = document.documentElement.style;
+                root.setProperty('--shot-w', shotW + 'px');
+                root.setProperty('--shot-h', shotH + 'px');
+                updateColumnVisibility();   // 칸이 넓어지면 캔버스도 함께 넓힘
+            };
+            // 스티커·박스 등은 칸(이미지)을 따라 같이 이동 — 이미지 아래쪽에 놓인 것은 길어진 만큼 함께 내려감
+            if (silent) apply();
+            else keepObjectsAnchored(
+                () => Array.from(document.querySelectorAll('#main-canvas > .character-column')),
+                apply,
+                () => Array.from(document.querySelectorAll('#main-canvas > .character-column .main-headshot-box')).find(b => b.offsetHeight));
+            if (!silent) triggerAutoSave();
+        }
+
         // 캐릭터 업로드 칸을 반신(세로형) / 두상(정사각) 형태로 전환합니다. 5칸 모두에 동일하게 적용됩니다.
         function setImageShape(shape) {
             if (shape !== 'bust' && shape !== 'head') shape = 'bust';
@@ -1785,6 +1993,7 @@
             canvas.classList.add('mode-' + shape);
             const radio = document.querySelector('input[name="image-shape-choice"][value="' + shape + '"]');
             if (radio) radio.checked = true;
+            const hw = document.getElementById('shot-h-wrap'); if (hw) hw.style.display = (shape === 'head') ? 'none' : '';
             for (let i = 1; i <= 5; i++) {
                 const span = document.querySelector('#c' + i + '-bust-upload-zone .placeholder-text span');
                 if (span) span.innerHTML = (shape === 'head') ? '더블클릭<br>두상 이미지 업로드' : '더블클릭<br>반신 이미지 업로드';
@@ -2431,18 +2640,6 @@
             toolbar.style.top = tTop + 'px';
         }
 
-        function alignSingleToColumnBounds(st, direction) {
-            const col = st.parentElement;
-            const colW = col.clientWidth, colH = col.clientHeight;
-            const stW = st.offsetWidth, stH = st.offsetHeight;
-            if (direction === 'left') st.style.left = '0px';
-            else if (direction === 'center-h') st.style.left = ((colW - stW) / 2) + 'px';
-            else if (direction === 'right') st.style.left = (colW - stW) + 'px';
-            else if (direction === 'top') st.style.top = '0px';
-            else if (direction === 'center-v') st.style.top = ((colH - stH) / 2) + 'px';
-            else if (direction === 'bottom') st.style.top = (colH - stH) + 'px';
-        }
-
         // 선택한 스티커들의 크기를 '가장 먼저 고른 스티커'에 맞춥니다.
         // 세로는 비율에 따라 자동으로 따라오므로 가로폭만 맞추면 됩니다.
         function matchStickerSize() {
@@ -2454,52 +2651,136 @@
             showToast('처음 고른 스티커 크기(' + Math.round(baseW) + 'px)로 맞췄습니다');
         }
 
-        function alignSticker(direction) {
+
+        /* ===== 스티커 획(테두리) =====
+           CSS 효과는 이미지 저장(html2canvas)에 안 나오므로, 원본 이미지 둘레에 획을 '직접 그린' 이미지로 바꿔 끼웁니다.
+           원본은 data-orig에 보관 → 굵기·색을 몇 번이고 바꾸거나 0으로 끌 수 있습니다.
+           획 굵기는 화면(캔버스) 기준 px이며, 그림 자체의 크기와 위치(중심)는 그대로 유지됩니다. */
+        const _stkImgCache = new Map(), _stkSilCache = new Map();
+        const STK_WORK_MAX = 1000;   // 작업 해상도 상한 — 큰 사진도 빠르게
+        function _stkLoad(src) {
+            if (_stkImgCache.has(src)) return _stkImgCache.get(src);
+            const p = new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = src; });
+            _stkImgCache.set(src, p); return p;
+        }
+        async function _stkBase(orig) {
+            const im = await _stkLoad(orig);
+            const k = Math.min(1, STK_WORK_MAX / Math.max(im.naturalWidth, im.naturalHeight));
+            const w = Math.max(1, Math.round(im.naturalWidth * k)), h = Math.max(1, Math.round(im.naturalHeight * k));
+            const key = orig + '|base';
+            if (!_stkSilCache.has(key)) { const c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(im, 0, 0, w, h); _stkSilCache.set(key, c); }
+            return _stkSilCache.get(key);
+        }
+        async function _stkRender(orig, pad, color) {
+            const base = await _stkBase(orig);
+            const sk = orig + '|' + color;
+            if (!_stkSilCache.has(sk)) {          // 그림 모양 그대로 한 가지 색으로 칠한 실루엣
+                const s = document.createElement('canvas'); s.width = base.width; s.height = base.height;
+                const x = s.getContext('2d'); x.drawImage(base, 0, 0); x.globalCompositeOperation = 'source-in'; x.fillStyle = color; x.fillRect(0, 0, s.width, s.height);
+                _stkSilCache.set(sk, s);
+            }
+            const sil = _stkSilCache.get(sk);
+            const out = document.createElement('canvas'); out.width = base.width + pad * 2; out.height = base.height + pad * 2;
+            const o = out.getContext('2d');
+            // 실루엣을 원 둘레로 조금씩 밀어 겹쳐 찍으면 둥근 획이 됩니다 (안쪽 링도 함께 찍어 빈틈 방지)
+            [pad, pad * 0.66, pad * 0.33].forEach(r => {
+                if (r < 0.5) return;
+                const n = Math.max(16, Math.min(96, Math.ceil(2 * Math.PI * r / 1.5)));
+                for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2; o.drawImage(sil, pad + Math.cos(a) * r, pad + Math.sin(a) * r); }
+            });
+            o.drawImage(base, pad, pad);
+            return { src: out.toDataURL('image/png'), workW: base.width };
+        }
+        let _stkTok = 0, _stkRaf = 0;
+        // 획 적용: t = 화면 기준 굵기(px). 그림 크기·중심 위치는 그대로 두고 획만큼 스티커 칸을 넓힙니다.
+        async function setStickerStroke(st, t, color) {
+            const img = st.querySelector('img'); if (!img) return;
+            if (!st.dataset.orig) st.dataset.orig = img.src;
+            const orig = st.dataset.orig, tok = st._stkTok = ++_stkTok;
+            const base = await _stkBase(orig).catch(() => null); if (!base || tok !== st._stkTok) return;
+            const Wk = base.width;
+            const curPad = parseFloat(st.dataset.strokePad) || 0;
+            // 스티커 칸에는 안쪽 여백(padding)이 있으므로 '이미지가 차지하는 폭'으로 계산
+            const cs = getComputedStyle(st);
+            const padX = (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
+            const padY = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
+            const contentW = () => Math.max(1, (st.offsetWidth || parseFloat(st.style.width) || 100) - padX);
+            const A = contentW() * Wk / (Wk + curPad * 2);          // 지금 보이는 '그림 자체'의 폭
+            const pad = t > 0 ? Math.max(1, Math.round(t * Wk / A)) : 0;
+            let src = orig;
+            if (pad) { const r = await _stkRender(orig, pad, color).catch(() => null); if (!r || tok !== st._stkTok) return; src = r.src; }
+            // 적용 직전 다시 측정 (그 사이에 크기가 바뀌었을 수 있음)
+            const C0 = contentW(), H0 = Math.max(0, st.offsetHeight - padY);
+            const A0 = C0 * Wk / (Wk + curPad * 2);
+            const Cn = A0 * (Wk + pad * 2) / Wk;
+            const Hn = Cn * (base.height + pad * 2) / (Wk + pad * 2);   // 높이는 새 이미지 비율을 따라감
+            img.src = src;
+            st.style.width = (cs.boxSizing === 'border-box' ? Cn + padX : Cn) + 'px';
+            st.style.left = ((parseFloat(st.style.left) || 0) - (Cn - C0) / 2) + 'px';
+            if (H0) st.style.top = ((parseFloat(st.style.top) || 0) - (Hn - H0) / 2) + 'px';
+            st.dataset.strokePad = pad; st.dataset.strokeW = pad ? t : 0; st.dataset.strokeC = color;
+            if (!pad) { delete st.dataset.orig; delete st.dataset.strokePad; }
+        }
+        function applyStickerStroke() {
+            const t = parseInt(document.getElementById('stk-stroke-w').value) || 0;
+            const color = document.getElementById('stk-stroke-color').value || '#ffffff';
+            document.getElementById('stk-stroke-val').innerText = t;
+            cancelAnimationFrame(_stkRaf);
+            _stkRaf = requestAnimationFrame(async () => {
+                await Promise.all(selectedStickers.map(st => setStickerStroke(st, t, color)));
+                repositionAlignToolbar();
+                if (typeof triggerAutoSave === 'function') triggerAutoSave(); else if (typeof saveToLocalStorage === 'function') saveToLocalStorage();
+            });
+        }
+        function syncStrokeControls() {
+            const st = selectedStickers[0]; if (!st) return;
+            const w = document.getElementById('stk-stroke-w'), c = document.getElementById('stk-stroke-color'), v = document.getElementById('stk-stroke-val');
+            if (!w) return;
+            w.value = parseInt(st.dataset.strokeW) || 0; v.innerText = w.value;
+            c.value = st.dataset.strokeC || '#ffffff';
+        }
+        // 저장/복원용: 원본과 획 정보를 함께 보관
+        function stickerStrokeData(st) {
+            return st.dataset.orig ? { orig: st.dataset.orig, strokeW: st.dataset.strokeW, strokeC: st.dataset.strokeC, strokePad: st.dataset.strokePad } : {};
+        }
+        function applyStickerStrokeData(st, d) {
+            if (!d || !d.orig) return;
+            st.dataset.orig = d.orig; st.dataset.strokeW = d.strokeW || 0; st.dataset.strokeC = d.strokeC || '#ffffff'; st.dataset.strokePad = d.strokePad || 0;
+        }
+
+        function alignSticker(dir) {
             if (!selectedStickers.length) return;
-
-            // 서로 다른 캐릭터 칸에 걸쳐 선택했을 수 있으므로, 칸별로 묶어서 처리합니다.
-            const groups = {};
-            selectedStickers.forEach(st => {
-                const colId = st.parentElement.id;
-                if (!groups[colId]) groups[colId] = [];
-                groups[colId].push(st);
+            const canvas = document.getElementById('main-canvas');
+            // 모든 계산은 '캔버스 기준 좌표'와 '눈에 보이는 테두리(회전 포함)'로 합니다.
+            // → 다른 캐릭터 칸에 있는 스티커끼리도, 회전된 스티커도 정확히 맞춰집니다.
+            const offs = el => { let x = 0, y = 0; for (let e = el; e && e !== canvas; e = e.offsetParent) { x += e.offsetLeft; y += e.offsetTop; } return [x, y]; };
+            const info = st => {
+                const par = st.parentElement, [px, py] = (par === canvas) ? [0, 0] : offs(par);
+                const w = st.offsetWidth, h = st.offsetHeight;
+                const a = (parseFloat(st.dataset.angle) || 0) * Math.PI / 180, c = Math.abs(Math.cos(a)), s = Math.abs(Math.sin(a));
+                const vw = w * c + h * s, vh = w * s + h * c;
+                const l = parseFloat(st.style.left) || 0, t = parseFloat(st.style.top) || 0;
+                const cx = px + l + w / 2, cy = py + t + h / 2;
+                return { st, par, px, py, w, h, vw, vh, cx, cy, L: cx - vw / 2, R: cx + vw / 2, T: cy - vh / 2, B: cy + vh / 2 };
+            };
+            const setCx = (d, cx) => { d.st.style.left = Math.round(cx - d.px - d.w / 2) + 'px'; };
+            const setCy = (d, cy) => { d.st.style.top = Math.round(cy - d.py - d.h / 2) + 'px'; };
+            const ds = selectedStickers.map(info);
+            const sameParent = ds.every(d => d.par === ds[0].par);
+            // 기준 영역: 하나만 골랐거나 모두 같은 칸이면 그 칸(캔버스), 아니면 고른 것들의 바깥 테두리
+            const box = (ds.length === 1 || (sameParent && /center/.test(dir)))
+                ? { L: ds[0].px, T: ds[0].py, R: ds[0].px + ds[0].par.clientWidth, B: ds[0].py + ds[0].par.clientHeight }
+                : { L: Math.min(...ds.map(d => d.L)), T: Math.min(...ds.map(d => d.T)), R: Math.max(...ds.map(d => d.R)), B: Math.max(...ds.map(d => d.B)) };
+            ds.forEach(d => {
+                if (dir === 'left') setCx(d, box.L + d.vw / 2);
+                else if (dir === 'right') setCx(d, box.R - d.vw / 2);
+                else if (dir === 'center-h') setCx(d, (box.L + box.R) / 2);
+                else if (dir === 'top') setCy(d, box.T + d.vh / 2);
+                else if (dir === 'bottom') setCy(d, box.B - d.vh / 2);
+                else if (dir === 'center-v') setCy(d, (box.T + box.B) / 2);
             });
-
-            Object.values(groups).forEach(items => {
-                if (items.length === 1) {
-                    // 하나만 선택된 경우: 캐릭터 칸(부모) 기준으로 정렬
-                    alignSingleToColumnBounds(items[0], direction);
-                    return;
-                }
-                // 여러 개 선택된 경우: 선택된 스티커들끼리의 기준선(바운딩 박스)에 맞춰 정렬
-                const data = items.map(st => ({ st, left: parseFloat(st.style.left) || 0, top: parseFloat(st.style.top) || 0, w: st.offsetWidth, h: st.offsetHeight }));
-                if (direction === 'left') {
-                    const v = Math.min(...data.map(d => d.left));
-                    data.forEach(d => d.st.style.left = v + 'px');
-                } else if (direction === 'right') {
-                    const v = Math.max(...data.map(d => d.left + d.w));
-                    data.forEach(d => d.st.style.left = (v - d.w) + 'px');
-                } else if (direction === 'center-h') {
-                    const minL = Math.min(...data.map(d => d.left));
-                    const maxR = Math.max(...data.map(d => d.left + d.w));
-                    const c = (minL + maxR) / 2;
-                    data.forEach(d => d.st.style.left = (c - d.w / 2) + 'px');
-                } else if (direction === 'top') {
-                    const v = Math.min(...data.map(d => d.top));
-                    data.forEach(d => d.st.style.top = v + 'px');
-                } else if (direction === 'bottom') {
-                    const v = Math.max(...data.map(d => d.top + d.h));
-                    data.forEach(d => d.st.style.top = (v - d.h) + 'px');
-                } else if (direction === 'center-v') {
-                    const minT = Math.min(...data.map(d => d.top));
-                    const maxB = Math.max(...data.map(d => d.top + d.h));
-                    const c = (minT + maxB) / 2;
-                    data.forEach(d => d.st.style.top = (c - d.h / 2) + 'px');
-                }
-            });
-
             repositionAlignToolbar();
-            triggerAutoSave();
+            if (typeof triggerAutoSave === 'function') triggerAutoSave(); else if (typeof saveToLocalStorage === 'function') saveToLocalStorage();
         }
 
         function deleteStickerEl(btn) {
@@ -2979,7 +3260,7 @@
             costumeSel = (el && (el.classList.contains('costume-box') || el.classList.contains('face-obj'))) ? el : null;
         }
         selectedStickers = [...multiSel].filter(e => e.classList.contains('draggable-sticker'));
-        if (selectedStickers.length) repositionAlignToolbar();
+        if (selectedStickers.length) { repositionAlignToolbar(); syncStrokeControls(); }
         else { const tb = document.getElementById('sticker-align-toolbar'); if (tb) tb.style.display = 'none'; }
         syncObjPanel();
     }
@@ -3289,7 +3570,8 @@
                 document.querySelectorAll(`#char-col-${i} .draggable-sticker`).forEach(st => {
                     savedStickers.push({ 
                         src: st.querySelector('img').src, left: st.style.left, top: st.style.top, 
-                        width: st.style.width, angle: st.dataset.angle, zIndex: st.dataset.zIndex || st.style.zIndex || 100 
+                        width: st.style.width, angle: st.dataset.angle, zIndex: st.dataset.zIndex || st.style.zIndex || 100,
+                        ...stickerStrokeData(st)
                     });
                 });
 
@@ -3315,6 +3597,10 @@
                 perspective: viewPerspective,
                 badgeSize: badgeSize,
                 badgeVisible: badgeVisible,
+                nameSize: nameSize,
+                hanjaSize: hanjaSize,
+                shotW: shotW,
+                shotH: shotH,
                 nameStyle: nameStyle,
                 subnameVisible: subnameVisible,
                 creditSource: document.getElementById('credit-source').innerText,
@@ -3368,6 +3654,12 @@
                 document.getElementById(`c${i}-spec-container`).innerHTML = '';
                 document.getElementById(`c${i}-palette-row`).innerHTML = '';
                 document.querySelectorAll(`#char-col-${i} .draggable-sticker`).forEach(el => el.remove());
+                /* 반신·두상 칸 비우기 — 안 비우면 되돌리기마다 이미지가 겹겹이 쌓임 */
+                const zone = document.getElementById(`c${i}-bust-upload-zone`);
+                if (zone) {
+                    zone.querySelectorAll(':scope > img').forEach(el => el.remove());
+                    const ph = zone.querySelector('.placeholder-text'); if (ph) ph.style.display = '';
+                }
             }
             const oldHcGroup = document.getElementById('height-compare-group');
             if (oldHcGroup) oldHcGroup.remove();
@@ -3391,12 +3683,15 @@
                         setCanvasTopExtra(g.canvasTopExt || 0, false);
                         setViewPerspective(g.perspective || 'viewer');
                         changeBadgeSize(g.badgeSize || 17);
+                        changeNameSize(g.nameSize || 24);
+                        changeHanjaSize(g.hanjaSize || 12);
                         window.__legacyBadgeColor = g.badgeColor || null;
                         setBadgeVisible(g.badgeVisible !== false);
                         setNameStyle('plate', true);
                     setSubnameVisible(g.subnameVisible !== undefined ? g.subnameVisible : [1,2,3,4,5].some(k => data['char_' + k] && data['char_' + k].subname && data['char_' + k].subname.trim()), true);
                         document.getElementById('credit-source').textContent = g.creditSource || '';
                         setImageShape(g.imageShape || 'bust');
+                        changeShotSize(g.shotW || 320, g.shotH || 500, true);
 
                         if(g.memberCount) {
                             const countRadio = document.querySelector(`input[name="member-count-choice"][value="${g.memberCount}"]`);
@@ -3468,6 +3763,7 @@
                                     sticker.innerHTML = `<img src="${stData.src}"><button class="delete-sticker-btn" onclick="deleteStickerEl(this);">×</button><div class="rotate-sticker-handle" title="회전"><svg class="ui-icon-fill"><use href="#icon-rotate"/></svg></div><div class="resize-sticker-handle" title="크기"></div>`;
                                     document.getElementById(`char-col-${i}`).appendChild(sticker);
                                     bindStickerEvents(sticker);
+                                    applyStickerStrokeData(sticker, stData);
                                 });
                             }
                         } else {
@@ -3698,34 +3994,8 @@
                 <button class="row-del-btn" onclick="this.parentElement.remove(); triggerAutoSave();">×</button>
             `;
             
-            newLi.addEventListener('dragstart', function(e) {
-                if (e.target.tagName === 'INPUT' || e.target.closest('.desc-text')) { e.preventDefault(); return; } 
-                draggedRowItem = this;
-                e.dataTransfer.effectAllowed = 'move';
-                setTimeout(() => this.classList.add('dragging'), 0);
-            });
-            newLi.addEventListener('dragend', function() {
-                this.classList.remove('dragging');
-                draggedRowItem = null;
-                triggerAutoSave();
-            });
-            newLi.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                e.dataTransfer.dropEffect = 'move';
-            });
-            newLi.addEventListener('drop', function(e) {
-                e.stopPropagation();
-                if (draggedRowItem !== this && this.parentNode === draggedRowItem.parentNode) {
-                    const list = this.parentNode;
-                    const items = Array.from(list.children);
-                    const draggedIdx = items.indexOf(draggedRowItem);
-                    const targetIdx = items.indexOf(this);
-                    if (draggedIdx < targetIdx) list.insertBefore(draggedRowItem, this.nextSibling);
-                    else list.insertBefore(draggedRowItem, this);
-                }
-            });
-
             container.appendChild(newLi);
+            bindDescSort(newLi, triggerAutoSave);
             const field = newLi.querySelector('.desc-text');
             // 저장해 둔 서식(굵게·색)을 그대로 되살립니다.
             field.innerHTML = (textValue === undefined || textValue === null) ? '' : String(textValue);
@@ -5084,6 +5354,8 @@
         window.addEventListener('resize', autoResponsiveScale);
         window.addEventListener('scroll', () => { if (document.getElementById('canvas-help-overlay').classList.contains('active')) positionHudGuide(); }, true);
         window.addEventListener('DOMContentLoaded', async () => {
+            document.documentElement.style.setProperty('--name-size', nameSize + 'px');
+            document.documentElement.style.setProperty('--hanja-size', hanjaSize + 'px');
             await loadDataFromDB();
             enableTouchSupport();
             setupSidebarUX();
